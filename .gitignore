@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Solemates/.vs
+/.vs
+/Solemates/StepStyle.Web/obj
