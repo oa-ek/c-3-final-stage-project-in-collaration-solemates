@@ -67,7 +67,6 @@ namespace StepStyle.Web.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            // Отримуємо всі бренди з продуктами, але беремо лише той, що з потрібним ID
             var brands = await _brandRepository.GetAllIncludeAsync(b => b.Products);
             var brand = brands.FirstOrDefault(b => b.Id == id);
 
