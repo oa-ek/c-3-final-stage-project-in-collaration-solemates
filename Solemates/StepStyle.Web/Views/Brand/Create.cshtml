@@ -5,23 +5,31 @@
 }
 
 <div class="container my-4">
-    <h1>Створення нового бренду</h1>
+    <h1 class="h3 fw-bold">Створення нового бренду</h1>
     <hr />
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-5">
             <form asp-action="Create">
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label text-primary fw-bold">Введіть назву бренду</label>
+                    <label asp-for="Name" class="form-label text-secondary small fw-bold text-uppercase">Назва бренду</label>
                     <input asp-for="Name" class="form-control" placeholder="Наприклад: Puma, Reebok..." required />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+                    <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-success">✅ Зберегти</button>
-                    <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+                    <button type="submit" class="btn btn-success px-4 fw-bold">
+                        + Зберегти
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Скасувати</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

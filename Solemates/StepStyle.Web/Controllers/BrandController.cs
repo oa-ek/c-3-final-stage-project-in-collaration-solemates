@@ -64,5 +64,16 @@ namespace StepStyle.Web.Controllers
             await _brandRepository.DeleteAsync(id);
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            // Отримуємо всі бренди з продуктами, але беремо лише той, що з потрібним ID
+            var brands = await _brandRepository.GetAllIncludeAsync(b => b.Products);
+            var brand = brands.FirstOrDefault(b => b.Id == id);
+
+            if (brand == null) return NotFound();
+
+            return View(brand);
+        }
     }
 }
