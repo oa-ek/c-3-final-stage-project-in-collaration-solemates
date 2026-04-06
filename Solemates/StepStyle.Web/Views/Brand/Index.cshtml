@@ -1,0 +1,41 @@
+﻿@model IEnumerable<StepStyle.Web.Models.Brand>
+
+@{
+    ViewData["Title"] = "Каталог брендів";
+}
+
+<div class="container">
+    <h1 class="my-4">Наші бренди та товари</h1>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">➕ Додати новий бренд</a>
+    </p>
+
+    @foreach (var brand in Model)
+    {
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h5 m-0">@brand.Name (ID: @brand.Id)</h2>
+            </div>
+            <div class="card-body">
+                <h6>Товари в наявності:</h6>
+                @if (brand.Products.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var product in brand.Products)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @product.Name
+                                <span class="badge bg-success rounded-pill">@product.Price грн.</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Товарів поки немає.</p>
+                }
+            </div>
+        </div>
+    }
+</div>
