@@ -27,8 +27,6 @@ namespace StepStyle.Web.Controllers
                 BrandId = brandId,
                 CategoryId = 1,
                 Description = "",
-                // Вказуємо значення з твого Enum. 
-                // Якщо Unisex підкреслює червоним, спробуй Gender.Men або Gender.Other
                 Gender = Gender.Unisex
             };
 
@@ -36,13 +34,11 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // 2. ЗБЕРЕГТИ НОВИЙ ТОВАР
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
         {
-            // СТРАХОВКА: Якщо опис або артикул порожні, база SQLite видасть помилку. 
-            // Тому ми заповнюємо їх автоматично, якщо користувач їх проігнорував.
+
             if (string.IsNullOrWhiteSpace(product.Description))
                 product.Description = "Опис буде додано пізніше";
 
@@ -52,7 +48,6 @@ namespace StepStyle.Web.Controllers
             if (product.CategoryId == 0)
                 product.CategoryId = 1;
 
-            // Очищаємо ModelState від навігаційних властивостей та полів, які ми заповнили вручну
             ModelState.Remove("Brand");
             ModelState.Remove("Category");
             ModelState.Remove("Description");
@@ -79,7 +74,6 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // 3. ВІДКРИТИ ФОРМУ РЕДАГУВАННЯ
         public async Task<IActionResult> Edit(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
@@ -91,12 +85,10 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // 4. ЗБЕРЕГТИ ЗМІНИ ПРИ РЕДАГУВАННІ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Product product)
         {
-            // При редагуванні також страхуємо SKU та опис
             if (string.IsNullOrWhiteSpace(product.SKU))
                 product.SKU = "SKU-UPDATED";
 
@@ -126,7 +118,6 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // 5. ВИДАЛЕННЯ
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
