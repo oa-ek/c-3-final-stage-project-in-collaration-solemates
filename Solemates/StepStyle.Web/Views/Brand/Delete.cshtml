@@ -1,0 +1,26 @@
+﻿@model StepStyle.Web.Models.Brand
+
+@{
+    ViewData["Title"] = "Видалення бренду";
+}
+
+<div class="container my-4">
+    <div class="alert alert-danger border-0 shadow-sm">
+        <h3 class="fw-bold">Ви впевнені?</h3>
+        <p class="mb-0">Бренд <strong>@Model.Name</strong> буде видалено назавжди.</p>
+    </div>
+
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <p class="mb-1 text-muted small text-uppercase fw-bold">Інформація:</p>
+            <p class="m-0"><strong>Назва:</strong> @Model.Name</p>
+            <p class="m-0"><strong>ID:</strong> #@Model.Id</p>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger px-4 fw-bold">Видалити</button>
+        <a asp-action="Index" class="btn btn-outline-secondary ms-2">Скасувати</a>
+    </form>
+</div>

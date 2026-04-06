@@ -4,38 +4,117 @@
     ViewData["Title"] = "Каталог брендів";
 }
 
-<div class="container">
-    <h1 class="my-4">Наші бренди та товари</h1>
-
-    <p>
-        <a asp-action="Create" class="btn btn-primary">➕ Додати новий бренд</a>
-    </p>
-
-    @foreach (var brand in Model)
-    {
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h2 class="h5 m-0">@brand.Name (ID: @brand.Id)</h2>
+<div class="container-fluid my-4">
+    <div class="row">
+        <div class="col-md-3 border-end">
+            <h4 class="mb-3">Каталог</h4>
+            <div class="list-group shadow-sm sticky-top" style="top: 20px;">
+                <a href="#" class="list-group-item list-group-item-action active bg-primary border-primary">
+                    Усі бренди (@Model.Count())
+                </a>
+                @foreach (var brand in Model)
+                {
+                    <a href="#brand-@brand.Id" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        @brand.Name
+                        <span class="badge rounded-pill bg-light text-dark border small">@(brand.Products?.Count ?? 0)</span>
+                    </a>
+                }
             </div>
-            <div class="card-body">
-                <h6>Товари в наявності:</h6>
-                @if (brand.Products.Any())
-                {
-                    <ul class="list-group list-group-flush">
-                        @foreach (var product in brand.Products)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @product.Name
-                                <span class="badge bg-success rounded-pill">@product.Price грн.</span>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted">Товарів поки немає.</p>
-                }
+
+            <div class="mt-4 d-grid">
+                <a asp-action="Create" class="btn btn-outline-primary fw-bold shadow-sm">+ Додати новий бренд</a>
             </div>
         </div>
-    }
+
+        <div class="col-md-9 ps-md-4">
+            <h1 class="mb-4 fw-bold">Наші бренди</h1>
+
+            @foreach (var brand in Model)
+            {
+                <div id="brand-@brand.Id" class="card mb-5 shadow-sm border-0 bg-white">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                        <div class="d-flex align-items-center">
+                            <h2 class="h4 m-0 fw-bold">@brand.Name</h2>
+                            <a asp-action="Details" asp-route-id="@brand.Id" class="btn btn-sm btn-light ms-3 px-3 rounded-pill shadow-sm">
+                                Перейти до товарів (@(brand.Products?.Count ?? 0))
+                            </a>
+                        </div>
+                        <div class="btn-group">
+                            <a asp-action="Edit" asp-route-id="@brand.Id" class="btn btn-sm btn-warning text-dark me-2 rounded">Редагувати</a>
+                            <a asp-action="Delete" asp-route-id="@brand.Id" class="btn btn-sm btn-danger rounded">-</a>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                    <h6 class="m-0 fw-bold text-secondary text-uppercase small">Прев'ю товарів:</h6>
+                                    <a asp-controller="Product" asp-action="Create" asp-route-brandId="@brand.Id" class="btn btn-sm btn-outline-success">
+                                        + Додати товар
+                                    </a>
+                                </div>
+
+                                @if (brand.Products != null && brand.Products.Any())
+                                {
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var product in brand.Products.Take(3))
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                                                <div>
+                                                    <span class="fw-bold">@product.Name</span>
+                                                    <span class="text-success ms-2 fw-bold">@product.Price ₴</span>
+                                                    <span class="badge bg-light text-muted border ms-1 small">@product.Gender</span>
+                                                </div>
+                                                <div class="btn-group">
+                                                    <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-link text-warning p-1 text-decoration-none">Редагувати</a>
+                                                    <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" class="btn btn-link text-danger p-1 text-decoration-none" onclick="return confirm('Видалити?')">-</a>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+
+                                    @if (brand.Products.Count > 3)
+                                    {
+                                        <div class="mt-3 text-center">
+                                            <a asp-action="Details" asp-route-id="@brand.Id" class="text-decoration-none small fw-bold">
+                                                Читати далі (ще @(brand.Products.Count - 3) моделей)...
+                                            </a>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="py-4 text-center border rounded bg-light">
+                                        <p class="text-muted m-0 italic small">Для цього бренду ще не додано жодного товару.</p>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="col-md-4 text-center d-flex flex-column align-items-center justify-content-center bg-light rounded border-start">
+                                <div class="p-3 bg-white rounded-circle shadow-sm mb-2" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="h3 m-0 text-primary">@brand.Name[0]</span>
+                                </div>
+                                <span class="text-muted small fw-bold">@brand.Name Official</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>
+
+<style>
+    .list-group-item-action.active {
+        border-color: transparent;
+    }
+
+    .card {
+        transition: all 0.3s;
+    }
+
+        .card:hover {
+            transform: scale(1.01);
+        }
+</style>

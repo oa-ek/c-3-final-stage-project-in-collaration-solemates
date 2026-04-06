@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StepStyle.Web.Data;
 using StepStyle.Web.Repositories.Interfaces;
+using System.Linq.Expressions;
 
 namespace StepStyle.Web.Repositories
 {
@@ -18,6 +19,16 @@ namespace StepStyle.Web.Repositories
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetAllIncludeAsync(params Expression<Func<T, object>>[] includeProperties)
+        {
+            IQueryable<T> query = _dbSet;
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
+            }
+            return await query.ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(int id)
