@@ -1,0 +1,33 @@
+﻿@model StepStyle.Web.Models.Product
+
+@{
+    ViewData["Title"] = "Додати товар";
+}
+
+<div class="container my-4">
+    <h1>Додати товар для бренду: <span class="text-primary">@ViewBag.BrandName</span></h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <input type="hidden" asp-for="BrandId" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
+                    <input asp-for="Name" class="form-control" placeholder="Наприклад: Air Force 1" required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Price" class="form-label fw-bold">Ціна (грн)</label>
+                    <input asp-for="Price" type="number" class="form-control" required />
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">✅ Додати товар</button>
+                    <a asp-controller="Brand" asp-action="Index" class="btn btn-secondary">Скасувати</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+﻿@model StepStyle.Web.Models.Brand
+
+@{
+    ViewData["Title"] = "Редагувати бренд";
+}
+
+<div class="container my-4">
+    <h1>Редагування бренду</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-bold">Назва бренду</label>
+                    <input asp-for="Name" class="form-control" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-warning text-dark fw-bold">Оновити</button>
+                <a asp-action="Index" class="btn btn-secondary">Назад</a>
+            </form>
+        </div>
+    </div>
+</div>
