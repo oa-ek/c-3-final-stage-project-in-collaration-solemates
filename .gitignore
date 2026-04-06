@@ -5,3 +5,4 @@
 /Solemates/.vs
 /.vs
 /Solemates/StepStyle.Web/obj
+*.db-shm

@@ -1,0 +1,27 @@
+﻿@model StepStyle.Web.Models.Brand
+
+@{
+    ViewData["Title"] = "Додати новий бренд";
+}
+
+<div class="container my-4">
+    <h1>Створення нового бренду</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label text-primary fw-bold">Введіть назву бренду</label>
+                    <input asp-for="Name" class="form-control" placeholder="Наприклад: Puma, Reebok..." required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">✅ Зберегти</button>
+                    <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
