@@ -6,3 +6,6 @@
 /.vs
 /Solemates/StepStyle.Web/obj
 *.db-shm
+/Solemates/StepStyle.Web/stepstyle.db
+/Solemates/StepStyle.Web/stepstyle.db-shm
+/Solemates/StepStyle.Web/stepstyle.db-wal

@@ -2,71 +2,86 @@
 
 @{
     ViewData["Title"] = "Додати товар";
+    var allSizes = ViewBag.FullSizesList as List<StepStyle.Web.Models.Size>;
 }
 
 <div class="container my-4">
-    <div class="card shadow-sm">
+    <div class="card shadow">
         <div class="card-header bg-success text-white">
             <h2 class="h4 m-0">Новий товар для бренду: @ViewBag.BrandName</h2>
         </div>
         <div class="card-body">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                 <input type="hidden" asp-for="BrandId" />
-                <input type="hidden" asp-for="CategoryId" value="1" />
+                <input type="hidden" asp-for="CategoryId" />
 
                 <div class="row">
                     <div class="col-md-6 border-end">
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
-                            <input asp-for="Name" class="form-control" placeholder="Наприклад: Air Jordan 1 Retro" />
-                            <span asp-validation-for="Name" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="SKU" class="form-label fw-bold">Артикул (SKU)</label>
-                            <input asp-for="SKU" class="form-control" placeholder="Наприклад: SS-2024-NIKE-01" />
-                            <span asp-validation-for="SKU" class="text-danger small"></span>
+                            <input asp-for="Name" class="form-control" required placeholder="Наприклад: Nike Air Force" />
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Price" class="form-label fw-bold">Ціна (грн)</label>
-                                <div class="input-group">
-                                    <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
-                                    <span class="input-group-text">₴</span>
-                                </div>
-                                <span asp-validation-for="Price" class="text-danger small"></span>
+                                <input asp-for="Price" type="number" step="0.01" class="form-control" required />
                             </div>
-
                             <div class="col-md-6 mb-3">
-                                <label asp-for="Gender" class="form-label fw-bold">Для кого (Стать)</label>
-                                <select asp-for="Gender" class="form-select"
-                                        asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()">
-                                </select>
-                                <span asp-validation-for="Gender" class="text-danger small"></span>
+                                <label asp-for="Gender" class="form-label fw-bold">Стать</label>
+                                <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label asp-for="Description" class="form-label fw-bold">Детальний опис товару</label>
-                            <textarea asp-for="Description" class="form-control" rows="8"
-                                      placeholder="Вкажіть матеріали, особливості підошви, сезонність та іншу важливу інформацію..."></textarea>
-                            <span asp-validation-for="Description" class="text-danger small"></span>
+                            <label class="form-label fw-bold">Головне фото</label>
+                            <input type="file" name="uploadedImage" class="form-control" accept="image/*" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold">Опис</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <hr />
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="text-muted small">* Поля SKU та Опис будуть заповнені автоматично, якщо залишити їх порожніми.</p>
-                    <div>
-                        <a asp-controller="Brand" asp-action="Index" class="btn btn-outline-secondary me-2">Скасувати</a>
-                        <button type="submit" class="btn btn-success px-5">Створити товар</button>
-                    </div>
+                <hr class="my-4" />
+
+                <h5 class="fw-bold text-secondary mb-3">Розмірна сітка (вкажіть кількість там, де є товар)</h5>
+                <div class="row bg-light p-3 rounded border">
+                    @if (allSizes != null && allSizes.Any())
+                    {
+                        for (int i = 0; i < allSizes.Count; i++)
+                        {
+                            <div class="col-lg-2 col-md-3 col-4 mb-3">
+                                <div class="card text-center border-primary shadow-sm">
+                                    <div class="card-header py-1 bg-primary text-white fw-bold">
+                                        @allSizes[i].Value
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
+                                        <input type="number" name="Variants[@i].QuantityInStock"
+                                               class="form-control form-control-sm text-center"
+                                               value="0" min="0" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12 text-center text-danger">
+                            Помилка: Розміри не завантажені. Перезавантажте сторінку.
+                        </div>
+                    }
+                </div>
+
+                <div class="text-end mt-4">
+                    <a asp-controller="Brand" asp-action="Index" class="btn btn-outline-secondary me-2">Скасувати</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold shadow">Зберегти товар</button>
                 </div>
             </form>
         </div>

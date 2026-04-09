@@ -1,22 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using StepStyle.Web.Data;
 using StepStyle.Web.Models;
-using StepStyle.Web.Repositories.Interfaces;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace StepStyle.Web.Controllers
 {
     public class BrandController : Controller
     {
-        private readonly IGenericRepository<Brand> _brandRepository;
+        private readonly ApplicationDbContext _context;
 
-        public BrandController(IGenericRepository<Brand> brandRepository)
+        public BrandController(ApplicationDbContext context)
         {
-            _brandRepository = brandRepository;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var brands = await _brandRepository.GetAllIncludeAsync(b => b.Products);
+            var brands = await _context.Brands
+                .Include(b => b.Products)
+                    .ThenInclude(p => p.Images)
+                .ToListAsync();
+
             return View(brands);
         }
 
@@ -27,48 +33,19 @@ namespace StepStyle.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _brandRepository.AddAsync(brand);
+                _context.Brands.Add(brand);
+                await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             return View(brand);
-        }
-
-        public async Task<IActionResult> Edit(int id)
-        {
-            var brand = await _brandRepository.GetByIdAsync(id);
-            if (brand == null) return NotFound();
-            return View(brand);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(Brand brand)
-        {
-            if (ModelState.IsValid)
-            {
-                await _brandRepository.UpdateAsync(brand);
-                return RedirectToAction("Index");
-            }
-            return View(brand);
-        }
-
-        public async Task<IActionResult> Delete(int id)
-        {
-            var brand = await _brandRepository.GetByIdAsync(id);
-            if (brand == null) return NotFound();
-            return View(brand);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _brandRepository.DeleteAsync(id);
-            return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var brands = await _brandRepository.GetAllIncludeAsync(b => b.Products);
-            var brand = brands.FirstOrDefault(b => b.Id == id);
+            var brand = await _context.Brands
+                .Include(b => b.Products)
+                    .ThenInclude(p => p.Images)
+                .FirstOrDefaultAsync(b => b.Id == id);
 
             if (brand == null) return NotFound();
 
