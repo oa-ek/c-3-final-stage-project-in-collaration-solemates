@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StepStyle.Web.Models;
 using StepStyle.Web.Repositories.Interfaces;
 using System;
@@ -10,6 +11,7 @@ using System.Linq;
 
 namespace StepStyle.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
         private readonly IGenericRepository<Product> _productRepository;
@@ -32,7 +34,7 @@ namespace StepStyle.Web.Controllers
             _variantRepository = variantRepository;
         }
 
-        //Перегляд товару
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -51,7 +53,6 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // Створення товару
         [HttpGet]
         public async Task<IActionResult> Create(int brandId)
         {
@@ -86,7 +87,6 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // Збереження нового товару
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product, IFormFile uploadedImage)
@@ -134,7 +134,6 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -145,7 +144,6 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
-        // Відредагований товар
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Product product, IFormFile? uploadedImage, int? ExistingImageId, string? ExistingImageUrl)
@@ -178,7 +176,6 @@ namespace StepStyle.Web.Controllers
                         await _variantRepository.AddAsync(variant);
                     }
 
-                    // Оновлення фото
                     if (uploadedImage != null && uploadedImage.Length > 0)
                     {
                         product.Images = new List<ProductImage> { await SaveImage(uploadedImage) };
@@ -212,6 +209,36 @@ namespace StepStyle.Web.Controllers
             return View(product);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null) return NotFound();
+
+            int brandId = product.BrandId;
+
+            try
+            {
+                var allVariants = await _variantRepository.GetAllAsync();
+                var productVariants = allVariants.Where(v => v.ProductId == id).ToList();
+
+                foreach (var variant in productVariants)
+                {
+                    await _variantRepository.DeleteAsync(variant.Id);
+                }
+
+                await _productRepository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Помилка при видаленні: " + ex.Message);
+                return RedirectToAction("Details", "Brand", new { id = brandId });
+            }
+
+            return RedirectToAction("Details", "Brand", new { id = brandId });
+        }
+
         private void CleanProductModelState(Product product)
         {
             ModelState.Remove("Brand");
@@ -235,7 +262,6 @@ namespace StepStyle.Web.Controllers
             ViewBag.FullSizesList = sizes.OrderBy(s => double.Parse(s.Value.Replace(',', '.'))).ToList();
         }
 
-        // Збереження фото
         private async Task<ProductImage> SaveImage(IFormFile file)
         {
             string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "products");

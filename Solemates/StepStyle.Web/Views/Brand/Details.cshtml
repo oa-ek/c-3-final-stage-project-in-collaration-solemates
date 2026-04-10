@@ -62,12 +62,14 @@
                                 <i class="bi bi-eye"></i> Переглянути картку
                             </a>
 
-                            <div class="d-flex justify-content-between">
-                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark flex-grow-1 me-1">Редагувати</a>
+                            <div class="d-flex justify-content-between gap-2">
+                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark flex-grow-1">Редагувати</a>
 
-                                <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id"
-                                   class="btn btn-sm btn-outline-danger flex-grow-1 ms-1"
-                                   onclick="return confirm('Видалити @product.Name?')">Видалити</a>
+                                <form asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" method="post" class="flex-grow-1 m-0 p-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Точно видалити @product.Name?');">
+                                        Видалити
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -85,7 +87,6 @@
 </div>
 
 <style>
-    /* Легкий ефект при наведенні на назву */
     .text-primary-hover:hover {
         color: #0d6efd !important;
     }

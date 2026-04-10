@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Mvc;
 using StepStyle.Web.Models;
 using StepStyle.Web.Repositories.Interfaces;
 using System.Threading.Tasks;
 
 namespace StepStyle.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class SizeController : Controller
     {
         private readonly IGenericRepository<Size> _sizeRepository;
@@ -14,6 +16,7 @@ namespace StepStyle.Web.Controllers
             _sizeRepository = sizeRepository;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index() => View(await _sizeRepository.GetAllAsync());
 
         [HttpGet]
