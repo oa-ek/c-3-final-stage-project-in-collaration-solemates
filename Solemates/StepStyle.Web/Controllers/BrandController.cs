@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StepStyle.Web.Data;
 using StepStyle.Web.Models;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace StepStyle.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class BrandController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,6 +18,7 @@ namespace StepStyle.Web.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var brands = await _context.Brands
@@ -40,6 +43,7 @@ namespace StepStyle.Web.Controllers
             return View(brand);
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             var brand = await _context.Brands

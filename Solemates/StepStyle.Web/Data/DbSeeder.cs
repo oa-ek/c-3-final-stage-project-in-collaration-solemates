@@ -1,4 +1,9 @@
-﻿using StepStyle.Web.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using StepStyle.Web.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace StepStyle.Web.Data
 {
@@ -42,11 +47,47 @@ namespace StepStyle.Web.Data
             {
                 ProductId = product1.Id,
                 SizeId = size42.Id,
-                QuantityInStock = 15 
+                QuantityInStock = 15
             };
             context.ProductVariants.Add(variant1);
 
             await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedRolesAndAdminAsync(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+            if (!await roleManager.RoleExistsAsync("User"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("User"));
+            }
+
+            string adminEmail = "admin@stepstyle.com";
+            string adminPassword = "Password123!"; 
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new IdentityUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true 
+                };
+
+                var result = await userManager.CreateAsync(adminUser, adminPassword);
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
         }
     }
 }
