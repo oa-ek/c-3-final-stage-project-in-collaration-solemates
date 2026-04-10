@@ -24,28 +24,51 @@
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
             @foreach (var product in Model.Products)
             {
+                var mainImg = product.Images?.FirstOrDefault(i => i.IsMain) ?? product.Images?.FirstOrDefault();
+
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0">
-                        <div class="bg-light text-center py-5 rounded-top" style="height: 180px;">
-                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                            <p class="text-muted small">Фото очікується</p>
-                        </div>
+
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark d-block">
+                            @if (mainImg != null && !string.IsNullOrEmpty(mainImg.ImageUrl))
+                            {
+                                <img src="@mainImg.ImageUrl" class="card-img-top rounded-top" alt="@product.Name" style="height: 180px; object-fit: cover; width: 100%; transition: 0.3s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1" />
+                            }
+                            else
+                            {
+                                <div class="bg-light text-center py-5 rounded-top" style="height: 180px;">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                    <p class="text-muted small">Фото очікується</p>
+                                </div>
+                            }
+                        </a>
 
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <span class="badge bg-info text-dark mb-2">@product.Gender</span>
                                 <small class="text-muted">@product.SKU</small>
                             </div>
-                            <h5 class="card-title fw-bold">@product.Name</h5>
+
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
+                                <h5 class="card-title fw-bold text-primary-hover">@product.Name</h5>
+                            </a>
+
                             <p class="card-text text-muted small text-truncate">@product.Description</p>
                             <h5 class="text-success fw-bold">@product.Price грн.</h5>
                         </div>
 
-                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between">
-                            <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark">Редагувати</a>
-                            <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id"
-                               class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('Видалити @product.Name?')">-</a>
+                        <div class="card-footer bg-white border-top-0 d-flex flex-column gap-2 pb-3">
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info w-100 fw-bold">
+                                <i class="bi bi-eye"></i> Переглянути картку
+                            </a>
+
+                            <div class="d-flex justify-content-between">
+                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark flex-grow-1 me-1">Редагувати</a>
+
+                                <a asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id"
+                                   class="btn btn-sm btn-outline-danger flex-grow-1 ms-1"
+                                   onclick="return confirm('Видалити @product.Name?')">Видалити</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -60,3 +83,10 @@
         </div>
     }
 </div>
+
+<style>
+    /* Легкий ефект при наведенні на назву */
+    .text-primary-hover:hover {
+        color: #0d6efd !important;
+    }
+</style>
