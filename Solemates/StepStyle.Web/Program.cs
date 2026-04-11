@@ -21,7 +21,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(StepStyle.Web.Repositories.GenericRepository<>));
 builder.Services.AddControllersWithViews();
 
-// Реєструємо наш сервіс відправки реальних email-ів
 builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, StepStyle.Web.Services.EmailSender>();
 
 var app = builder.Build();

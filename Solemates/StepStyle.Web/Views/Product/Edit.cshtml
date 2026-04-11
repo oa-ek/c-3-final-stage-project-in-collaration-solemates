@@ -6,100 +6,156 @@
     var firstImage = Model.Images?.FirstOrDefault(i => i.IsMain) ?? Model.Images?.FirstOrDefault();
 }
 
-<div class="container my-4">
-    <div class="card shadow border-0">
-        <div class="card-header bg-dark text-white">
-            <h2 class="h5 m-0">Редагування: @Model.Name</h2>
-        </div>
-        <div class="card-body">
-            <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="All" class="text-danger mb-3"></div>
-
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="BrandId" />
-                <input type="hidden" asp-for="CategoryId" />
-
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <div class="mb-3">
-                            <label asp-for="Name" class="form-label fw-bold small text-uppercase">Назва моделі</label>
-                            <input asp-for="Name" class="form-control" required />
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-dark text-white py-3 rounded-top-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-pencil-square fs-4 me-2 text-warning"></i>
+                            <h2 class="h4 m-0 fw-bold">Редагування: @Model.Name</h2>
                         </div>
-
-                        <div class="mb-3">
-                            <label asp-for="SKU" class="form-label fw-bold small text-uppercase">Артикул (SKU)</label>
-                            <input asp-for="SKU" class="form-control" />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="Price" class="form-label fw-bold small text-uppercase">Ціна (грн)</label>
-                                <input asp-for="Price" type="number" step="0.01" class="form-control" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="Gender" class="form-label fw-bold small text-uppercase">Стать</label>
-                                <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-uppercase">Фото товару</label>
-                            <div class="d-flex align-items-center bg-light p-2 rounded mb-2">
-                                @if (firstImage != null)
-                                {
-                                    <img src="@firstImage.ImageUrl" style="width: 60px; height: 60px; object-fit: cover;" class="rounded me-3 border" />
-                                    <input type="hidden" name="ExistingImageId" value="@firstImage.Id" />
-                                    <input type="hidden" name="ExistingImageUrl" value="@firstImage.ImageUrl" />
-                                }
-                                <input type="file" name="uploadedImage" class="form-control form-control-sm" accept="image/*" />
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Description" class="form-label fw-bold small text-uppercase">Опис</label>
-                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-                        </div>
+                        <span class="badge bg-outline-light border opacity-75">ID: #@Model.Id</span>
                     </div>
                 </div>
 
-                <hr class="my-4" />
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <h5 class="fw-bold text-secondary mb-3 small text-uppercase">Наявність по розмірах</h5>
-                <div class="row bg-light p-3 rounded border">
-                    @if (allSizes != null)
-                    {
-                        for (int i = 0; i < allSizes.Count; i++)
-                        {
-                            var currentVariant = Model.Variants?.FirstOrDefault(v => v.SizeId == allSizes[i].Id);
-                            var quantity = currentVariant?.QuantityInStock ?? 0;
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="BrandId" />
+                        <input type="hidden" asp-for="CategoryId" />
 
-                            <div class="col-lg-2 col-md-3 col-4 mb-3">
-                                <div class="card text-center border-primary shadow-sm">
-                                    <div class="card-header py-1 bg-primary text-white fw-bold small">
-                                        @allSizes[i].Value
+                        <div class="row g-4">
+                            <div class="col-md-7 border-end">
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase letter-spacing-1">Характеристики товару</h5>
+
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
+                                    <input asp-for="Name" class="form-control" required />
+                                    <span asp-validation-for="Name" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="SKU" class="form-label fw-bold">Артикул (SKU)</label>
+                                        <input asp-for="SKU" class="form-control bg-light" placeholder="Наприклад: 555088-105" />
                                     </div>
-                                    <div class="card-body p-2">
-                                        <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
-                                        <input type="number" name="Variants[@i].QuantityInStock"
-                                               class="form-control form-control-sm text-center"
-                                               value="@quantity" min="0" />
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Price" class="form-label fw-bold">Ціна (₴)</label>
+                                        <div class="input-group">
+                                            <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
+                                            <span class="input-group-text bg-white">₴</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    }
-                </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <small class="text-muted">ID: #@Model.Id</small>
-                    <div>
-                        <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-outline-secondary me-2">Скасувати</a>
-                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow">Зберегти зміни</button>
-                    </div>
+                                <div class="mb-3">
+                                    <label asp-for="Gender" class="form-label fw-bold">Стать</label>
+                                    <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label fw-bold">Опис</label>
+                                    <textarea asp-for="Description" class="form-control" rows="5">@Model.Description</textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase letter-spacing-1">Зображення</h5>
+
+                                <div class="card bg-light border-0 p-3 text-center mb-3 rounded-4">
+                                    <label class="form-label fw-bold d-block mb-3 small">Поточне головне фото</label>
+
+                                    <div class="position-relative d-inline-block mb-3">
+                                        @if (firstImage != null)
+                                        {
+                                            <img src="@firstImage.ImageUrl" class="img-thumbnail shadow-sm rounded-3" style="width: 200px; height: 200px; object-fit: cover;" />
+                                            <input type="hidden" name="ExistingImageId" value="@firstImage.Id" />
+                                            <input type="hidden" name="ExistingImageUrl" value="@firstImage.ImageUrl" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-white rounded-3 d-flex align-items-center justify-content-center border" style="width: 200px; height: 200px;">
+                                                <i class="bi bi-image text-muted opacity-25" style="font-size: 3rem;"></i>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="mt-2 text-start">
+                                        <label class="form-label small fw-bold">Замінити фото:</label>
+                                        <input type="file" name="uploadedImage" class="form-control form-control-sm" accept="image/*" />
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning border-0 small shadow-sm">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    Зверніть увагу: завантаження нового фото видалить старе головне зображення.
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5" />
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold m-0 text-muted small text-uppercase letter-spacing-1">Складський облік (Розміри)</h5>
+                            <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">Наявність у парах</span>
+                        </div>
+
+                        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+                            @if (allSizes != null)
+                            {
+                                for (int i = 0; i < allSizes.Count; i++)
+                                {
+                                    var currentVariant = Model.Variants?.FirstOrDefault(v => v.SizeId == allSizes[i].Id);
+                                    var quantity = currentVariant?.QuantityInStock ?? 0;
+
+                                    <div class="col">
+                                        <div class="card h-100 border-0 shadow-sm text-center">
+                                            <div class="card-header py-1 bg-light border-bottom-0">
+                                                <div class="fw-bolder fs-5 text-dark">@allSizes[i].Value</div>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
+                                                <input type="number" name="Variants[@i].QuantityInStock"
+                                                       class="form-control form-control-sm text-center border-0 bg-light fw-bold"
+                                                       value="@quantity" min="0" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <div class="mt-5 pt-4 border-top d-flex justify-content-between">
+                            <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-outline-secondary px-4 rounded-pill">
+                                Скасувати
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow fw-bold">
+                                <i class="bi bi-save me-2"></i> Оновити товар
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .letter-spacing-1 {
+        letter-spacing: 1px;
+    }
+
+    .form-control:focus {
+        border-color: #212529;
+        box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.1);
+    }
+
+    .img-thumbnail {
+        border: 2px solid #fff;
+    }
+</style>

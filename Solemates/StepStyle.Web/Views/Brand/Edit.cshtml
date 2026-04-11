@@ -4,35 +4,41 @@
     ViewData["Title"] = "Редагувати бренд";
 }
 
-<div class="container my-4">
-    <h1 class="h3 fw-bold">Редагування бренду</h1>
-    <hr />
-    <div class="row">
-        <div class="col-md-5">
-            <form asp-action="Edit" enctype="multipart/form-data">
-                <input type="hidden" asp-for="Id" />
+<header class="bg-dark py-4 mb-5 shadow-sm">
+    <div class="container px-4 px-lg-5 my-2 text-center text-white text-uppercase">
+        <h1 class="display-6 fw-bolder m-0">Редагування: @Model.Name</h1>
+    </div>
+</header>
 
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label fw-bold text-muted small text-uppercase">Назва бренду</label>
-                    <input asp-for="Name" class="form-control" required />
-                    <span asp-validation-for="Name" class="text-danger small"></span>
-                </div>
+<div class="container px-4 px-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-4 p-md-5 rounded-4">
+                <form asp-action="Edit" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="Id" />
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-muted small text-uppercase">Логотип бренду</label>
-                    <input type="file" name="logoFile" class="form-control" accept="image/*" />
-                    <div class="form-text">Оберіть квадратне зображення для кращого відображення.</div>
-                </div>
+                    <div class="mb-4 text-center">
+                        <label class="form-label fw-bold text-muted small text-uppercase d-block mb-3">Логотип бренду</label>
+                        <div class="input-group">
+                            <input type="file" name="logoFile" class="form-control border-0 bg-light shadow-none rounded-pill" accept="image/*" id="logoUpload" />
+                        </div>
+                        <div class="form-text mt-2 small">Оберіть квадратне зображення для кращого вигляду на вітрині.</div>
+                    </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-warning text-dark fw-bold px-4">
-                        Оновити
-                    </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">
-                        Назад
-                    </a>
-                </div>
-            </form>
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-bold text-muted small text-uppercase">Назва бренду</label>
+                        <input asp-for="Name" class="form-control form-control-lg border-0 bg-light shadow-none rounded-pill" required />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 pt-3">
+                        <button type="submit" class="btn btn-dark btn-lg flex-grow-1 rounded-pill fw-bold">
+                            Оновити дані
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Назад</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
