@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = Model.Name;
+    var detailsController = User.IsInRole("Admin") ? "Product" : "Catalog";
 }
 
 <div class="container my-4">
@@ -14,9 +15,12 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Взуття від <span class="text-primary">@Model.Name</span></h1>
-        <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-success fw-bold">
-            + Додати нову пару
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-success fw-bold">
+                + Додати нову пару
+            </a>
+        }
     </div>
 
     @if (Model.Products != null && Model.Products.Any())
@@ -29,7 +33,7 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm border-0">
 
-                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark d-block">
+                        <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark d-block">
                             @if (mainImg != null && !string.IsNullOrEmpty(mainImg.ImageUrl))
                             {
                                 <img src="@mainImg.ImageUrl" class="card-img-top rounded-top" alt="@product.Name" style="height: 180px; object-fit: cover; width: 100%; transition: 0.3s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1" />
@@ -49,7 +53,7 @@
                                 <small class="text-muted">@product.SKU</small>
                             </div>
 
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
+                            <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
                                 <h5 class="card-title fw-bold text-primary-hover">@product.Name</h5>
                             </a>
 
@@ -58,19 +62,23 @@
                         </div>
 
                         <div class="card-footer bg-white border-top-0 d-flex flex-column gap-2 pb-3">
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info w-100 fw-bold">
+
+                            <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info w-100 fw-bold">
                                 <i class="bi bi-eye"></i> Переглянути картку
                             </a>
 
-                            <div class="d-flex justify-content-between gap-2">
-                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark flex-grow-1">Редагувати</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="d-flex justify-content-between gap-2">
+                                    <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark flex-grow-1">Редагувати</a>
 
-                                <form asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" method="post" class="flex-grow-1 m-0 p-0">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Точно видалити @product.Name?');">
-                                        Видалити
-                                    </button>
-                                </form>
-                            </div>
+                                    <form asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" method="post" class="flex-grow-1 m-0 p-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Точно видалити @product.Name?');">
+                                            Видалити
+                                        </button>
+                                    </form>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

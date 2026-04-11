@@ -9,13 +9,19 @@
     <hr />
     <div class="row">
         <div class="col-md-5">
-            <form asp-action="Edit">
+            <form asp-action="Edit" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Id" />
 
                 <div class="mb-3">
                     <label asp-for="Name" class="form-label fw-bold text-muted small text-uppercase">Назва бренду</label>
                     <input asp-for="Name" class="form-control" required />
                     <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-muted small text-uppercase">Логотип бренду</label>
+                    <input type="file" name="logoFile" class="form-control" accept="image/*" />
+                    <div class="form-text">Оберіть квадратне зображення для кращого відображення.</div>
                 </div>
 
                 <div class="mt-4">

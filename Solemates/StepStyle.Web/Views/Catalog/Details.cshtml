@@ -1,0 +1,110 @@
+﻿@model StepStyle.Web.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+    var mainImage = Model.Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl
+                    ?? Model.Images?.FirstOrDefault()?.ImageUrl
+                    ?? "/images/no-image.png";
+}
+
+<div class="container my-5">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Catalog" asp-action="Index" class="text-decoration-none text-dark">Каталог</a></li>
+            <li class="breadcrumb-item active text-muted">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+                <img src="@mainImage" class="img-fluid w-100" style="object-fit: cover; min-height: 500px;" alt="@Model.Name">
+            </div>
+
+            @if (Model.Images?.Count > 1)
+            {
+                <div class="d-flex mt-3 gap-2">
+                    @foreach (var img in Model.Images)
+                    {
+                        <img src="@img.ImageUrl" class="rounded border cursor-pointer" style="width: 80px; height: 80px; object-fit: cover;" />
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-md-5">
+            <div class="ps-md-4">
+                <span class="badge bg-light text-dark border mb-2">Артикул: @Model.SKU</span>
+                <h1 class="display-5 fw-bold mb-2">@Model.Name</h1>
+                <p class="text-muted mb-4">Стать: @Model.Gender</p>
+
+                <h3 class="text-primary fw-bold mb-4">@Model.Price грн.</h3>
+
+                <hr class="my-4 opacity-10">
+
+                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-3 small text-uppercase">Виберіть розмір:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            @if (Model.Variants != null && Model.Variants.Any(v => v.QuantityInStock > 0))
+                            {
+                                @foreach (var variant in Model.Variants.Where(v => v.QuantityInStock > 0).OrderBy(v => v.Size.Value))
+                                {
+                                    <input type="radio" class="btn-check" name="productVariantId" id="size-@variant.Id" value="@variant.Id" required autocomplete="off">
+                                    <label class="btn btn-outline-dark px-3 py-2 fw-semibold rounded-3" for="size-@variant.Id">
+                                        @variant.Size?.Value
+                                    </label>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-danger fw-bold">Немає в наявності</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 pt-3">
+                        <button type="submit" class="btn btn-dark btn-lg py-3 rounded-pill fw-bold" @(Model.Variants != null && Model.Variants.Any(v => v.QuantityInStock > 0) ? "" : "disabled")>
+                            <i class="bi bi-cart-plus me-2"></i> Додати в кошик
+                        </button>
+                    </div>
+                </form>
+
+                <form asp-controller="Wishlist" asp-action="Add" method="post" class="mt-2">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline-danger btn-lg py-3 rounded-pill fw-bold w-100">
+                        <i class="bi bi-heart me-2"></i> Додати в улюблені
+                    </button>
+                </form>
+
+                <div class="mt-4">
+                    <h5 class="fw-bold mb-2 small text-uppercase">Про товар:</h5>
+                    <p class="text-secondary lh-lg" style="white-space: pre-line;">
+                        @Model.Description
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .cursor-pointer:hover {
+            border-color: #000 !important;
+            transform: scale(1.05);
+        }
+</style>

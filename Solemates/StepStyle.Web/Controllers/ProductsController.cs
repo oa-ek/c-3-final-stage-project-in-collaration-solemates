@@ -137,8 +137,13 @@ namespace StepStyle.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var products = await _productRepository.GetAllIncludeAsync(p => p.Images);
+            var product = products.FirstOrDefault(p => p.Id == id);
+
             if (product == null) return NotFound();
+
+            var allVariants = await _variantRepository.GetAllAsync();
+            product.Variants = allVariants.Where(v => v.ProductId == id).ToList();
 
             await PrepareViewBag(product.BrandId);
             return View(product);
@@ -178,7 +183,14 @@ namespace StepStyle.Web.Controllers
 
                     if (uploadedImage != null && uploadedImage.Length > 0)
                     {
-                        product.Images = new List<ProductImage> { await SaveImage(uploadedImage) };
+                        var newImage = await SaveImage(uploadedImage);
+                        if (ExistingImageId.HasValue && ExistingImageId.Value > 0)
+                        {
+                            newImage.Id = ExistingImageId.Value;
+                            newImage.ProductId = product.Id;
+                        }
+
+                        product.Images = new List<ProductImage> { newImage };
                     }
                     else if (!string.IsNullOrEmpty(ExistingImageUrl))
                     {
