@@ -5,80 +5,83 @@
     var detailsController = User.IsInRole("Admin") ? "Product" : "Catalog";
 }
 
-<div class="container my-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Каталог</a></li>
-            <li class="breadcrumb-item active">@Model.Name</li>
-        </ol>
-    </nav>
+<header class="bg-dark py-4 mb-5 shadow-sm">
+    <div class="container px-4 px-lg-5 my-2">
+        <div class="text-center text-white">
+            <h1 class="display-5 fw-bolder text-uppercase">@Model.Name</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-white-50 text-decoration-none small">Каталог брендів</a></li>
+                    <li class="breadcrumb-item active text-white small" aria-current="page">@Model.Name</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</header>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Взуття від <span class="text-primary">@Model.Name</span></h1>
+<div class="container px-4 px-lg-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold m-0">Колекція бренду</h2>
         @if (User.IsInRole("Admin"))
         {
-            <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-success fw-bold">
-                + Додати нову пару
+            <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-sm rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Додати нову пару
             </a>
         }
     </div>
 
     @if (Model.Products != null && Model.Products.Any())
     {
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-3 row-cols-xl-4 justify-content-start">
             @foreach (var product in Model.Products)
             {
                 var mainImg = product.Images?.FirstOrDefault(i => i.IsMain) ?? product.Images?.FirstOrDefault();
 
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-
-                        <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark d-block">
-                            @if (mainImg != null && !string.IsNullOrEmpty(mainImg.ImageUrl))
-                            {
-                                <img src="@mainImg.ImageUrl" class="card-img-top rounded-top" alt="@product.Name" style="height: 180px; object-fit: cover; width: 100%; transition: 0.3s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1" />
-                            }
-                            else
-                            {
-                                <div class="bg-light text-center py-5 rounded-top" style="height: 180px;">
-                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                                    <p class="text-muted small">Фото очікується</p>
-                                </div>
-                            }
-                        </a>
-
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <span class="badge bg-info text-dark mb-2">@product.Gender</span>
-                                <small class="text-muted">@product.SKU</small>
-                            </div>
-
-                            <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
-                                <h5 class="card-title fw-bold text-primary-hover">@product.Name</h5>
+                <div class="col mb-5">
+                    <div class="card h-100 shadow-sm border-0 product-card overflow-hidden">
+                        <div class="position-relative">
+                            <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id">
+                                @if (mainImg != null && !string.IsNullOrEmpty(mainImg.ImageUrl))
+                                {
+                                    <img src="@mainImg.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light text-center py-5" style="height: 200px;">
+                                        <i class="bi bi-image text-muted opacity-25" style="font-size: 4rem;"></i>
+                                    </div>
+                                }
                             </a>
-
-                            <p class="card-text text-muted small text-truncate">@product.Description</p>
-                            <h5 class="text-success fw-bold">@product.Price грн.</h5>
+                            <span class="badge bg-dark position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill shadow-sm">@product.Gender</span>
                         </div>
 
-                        <div class="card-footer bg-white border-top-0 d-flex flex-column gap-2 pb-3">
+                        <div class="card-body p-4 text-center">
+                            <div class="small text-muted mb-1">Арт: @product.SKU</div>
+                            <h5 class="fw-bolder mb-2">@product.Name</h5>
+                            <div class="fs-5 fw-bold text-dark">@product.Price ₴</div>
+                        </div>
 
-                            <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info w-100 fw-bold">
-                                <i class="bi bi-eye"></i> Переглянути картку
-                            </a>
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                            <div class="d-grid gap-2">
+                                <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="btn btn-outline-dark rounded-pill shadow-sm btn-sm fw-bold">
+                                    Детальніше
+                                </a>
 
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <div class="d-flex justify-content-between gap-2">
-                                    <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning text-dark flex-grow-1">Редагувати</a>
-
-                                    <form asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" method="post" class="flex-grow-1 m-0 p-0">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Точно видалити @product.Name?');">
-                                            Видалити
-                                        </button>
-                                    </form>
-                                </div>
-                            }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <div class="d-flex gap-2">
+                                        <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning btn-sm flex-grow-1 rounded-pill">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" method="post" class="flex-grow-1">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm w-100 rounded-pill" onclick="return confirm('Видалити @product.Name?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,15 +90,32 @@
     }
     else
     {
-        <div class="text-center py-5">
-            <h3 class="text-muted">У цього бренду ще немає товарів</h3>
-            <p>Будьте першим, хто додасть круту пару взуття!</p>
+        <div class="text-center py-5 bg-light rounded-4 border border-dashed">
+            <i class="bi bi-emoji-neutral text-muted" style="font-size: 3rem;"></i>
+            <h3 class="text-muted mt-3">У цього бренду ще немає товарів</h3>
+            <p class="text-secondary">Будьте першим, хто додасть круту пару взуття!</p>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-lg rounded-pill px-5 shadow-sm mt-3">
+                    <i class="bi bi-plus-lg me-2"></i> Додати першу пару
+                </a>
+            }
         </div>
     }
 </div>
 
 <style>
-    .text-primary-hover:hover {
-        color: #0d6efd !important;
+    .product-card {
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+        }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.5);
     }
 </style>

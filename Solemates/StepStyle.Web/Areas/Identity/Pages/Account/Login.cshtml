@@ -1,0 +1,70 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Вхід";
+}
+
+<div class="container my-5 py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white text-center py-4 border-0">
+                    <h2 class="h4 fw-bold mb-0 text-uppercase letter-spacing-2">StepStyle</h2>
+                    <p class="small opacity-75 mb-0">Вітаємо знову!</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control border-0 border-bottom rounded-0 shadow-none bg-light" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <label asp-for="Input.Email">Електронна пошта</label>
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Password" class="form-control border-0 border-bottom rounded-0 shadow-none bg-light" autocomplete="current-password" aria-required="true" placeholder="пароль" />
+                            <label asp-for="Input.Password">Пароль</label>
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check text-muted">
+                                <input class="form-check-input" asp-for="Input.RememberMe" />
+                                <label class="form-check-label small" asp-for="Input.RememberMe">Запам'ятати мене</label>
+                            </div>
+                            <a id="forgot-password" asp-page="./ForgotPassword" class="small text-dark text-decoration-none border-bottom">Забули пароль?</a>
+                        </div>
+
+                        <button id="login-submit" type="submit" class="btn btn-dark btn-lg w-100 py-3 rounded-pill fw-bold shadow-sm mb-3">УВІЙТИ</button>
+
+                        <div class="text-center mt-4">
+                            <p class="small text-muted mb-1">Ще не маєте акаунту?</p>
+                            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-dark fw-bold text-decoration-none border-bottom border-dark">Зареєструватися</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .letter-spacing-2 {
+        letter-spacing: 2px;
+    }
+
+    .form-control:focus {
+        background-color: #fcfcfc !important;
+        border-color: #000 !important;
+    }
+
+    .form-floating > label {
+        opacity: 0.7;
+    }
+</style>

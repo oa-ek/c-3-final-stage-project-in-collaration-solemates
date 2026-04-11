@@ -117,6 +117,36 @@ namespace StepStyle.Web.Controllers
             return View(brand);
         }
 
+        // GET: Brand/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var brand = await _context.Brands.FindAsync(id);
+            if (brand == null) return NotFound();
+
+            return View(brand);
+        }
+
+        // POST: Brand/Delete/5
+        [HttpPost, ActionName("DeleteConfirmed")] // Важливо: ActionName зв'язує назву з формою
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var brand = await _context.Brands
+                .Include(b => b.Products)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (brand != null)
+            {
+                // Якщо хочеш видаляти бренд навіть якщо є товари (будь обережна!)
+                _context.Brands.Remove(brand);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         private bool BrandExists(int id)
         {
             return _context.Brands.Any(e => e.Id == id);

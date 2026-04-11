@@ -4,23 +4,41 @@
     ViewData["Title"] = "Видалення бренду";
 }
 
-<div class="container my-4">
-    <div class="alert alert-danger border-0 shadow-sm">
-        <h3 class="fw-bold">Ви впевнені?</h3>
-        <p class="mb-0">Бренд <strong>@Model.Name</strong> буде видалено назавжди.</p>
+<header class="bg-dark py-4 mb-5 shadow-sm">
+    <div class="container px-4 px-lg-5 my-2 text-center text-white">
+        <h1 class="display-6 fw-bolder text-uppercase m-0">Підтвердження видалення</h1>
     </div>
+</header>
 
-    <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-body">
-            <p class="mb-1 text-muted small text-uppercase fw-bold">Інформація:</p>
-            <p class="m-0"><strong>Назва:</strong> @Model.Name</p>
-            <p class="m-0"><strong>ID:</strong> #@Model.Id</p>
+<div class="container px-4 px-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-4 p-md-5 rounded-4 text-center">
+                <div class="mb-4 text-danger">
+                    <i class="bi bi-exclamation-octagon" style="font-size: 4rem;"></i>
+                </div>
+
+                <h3 class="fw-bold mb-3">Ви впевнені?</h3>
+                <p class="text-muted mb-4">
+                    Бренд <span class="fw-bold text-dark">@Model.Name</span> (ID: #@Model.Id) буде видалено назавжди разом із посиланнями на товари.
+                </p>
+
+                <div class="bg-light p-3 rounded-3 mb-4 border border-dashed">
+                    <p class="small text-secondary mb-0">Цю дію неможливо буде скасувати.</p>
+                </div>
+
+                <form asp-action="DeleteConfirmed">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg flex-grow-1 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-trash3 me-2"></i> Так, видалити
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg flex-grow-1 rounded-pill px-4">
+                            Скасувати
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger px-4 fw-bold">Видалити</button>
-        <a asp-action="Index" class="btn btn-outline-secondary ms-2">Скасувати</a>
-    </form>
 </div>

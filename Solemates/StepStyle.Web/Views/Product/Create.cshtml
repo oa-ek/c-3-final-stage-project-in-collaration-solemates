@@ -5,85 +5,146 @@
     var allSizes = ViewBag.FullSizesList as List<StepStyle.Web.Models.Size>;
 }
 
-<div class="container my-4">
-    <div class="card shadow">
-        <div class="card-header bg-success text-white">
-            <h2 class="h4 m-0">Новий товар для бренду: @ViewBag.BrandName</h2>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="All" class="text-danger mb-3"></div>
-
-                <input type="hidden" asp-for="BrandId" />
-                <input type="hidden" asp-for="CategoryId" />
-
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <div class="mb-3">
-                            <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
-                            <input asp-for="Name" class="form-control" required placeholder="Наприклад: Nike Air Force" />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="Price" class="form-label fw-bold">Ціна (грн)</label>
-                                <input asp-for="Price" type="number" step="0.01" class="form-control" required />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="Gender" class="form-label fw-bold">Стать</label>
-                                <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Головне фото</label>
-                            <input type="file" name="uploadedImage" class="form-control" accept="image/*" />
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="Description" class="form-label fw-bold">Опис</label>
-                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                        </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-dark text-white py-3 rounded-top-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-plus-circle-fill fs-4 me-2"></i>
+                        <h2 class="h4 m-0 fw-bold">Новий товар: @ViewBag.BrandName</h2>
                     </div>
                 </div>
 
-                <hr class="my-4" />
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <h5 class="fw-bold text-secondary mb-3">Розмірна сітка (вкажіть кількість там, де є товар)</h5>
-                <div class="row bg-light p-3 rounded border">
-                    @if (allSizes != null && allSizes.Any())
-                    {
-                        for (int i = 0; i < allSizes.Count; i++)
-                        {
-                            <div class="col-lg-2 col-md-3 col-4 mb-3">
-                                <div class="card text-center border-primary shadow-sm">
-                                    <div class="card-header py-1 bg-primary text-white fw-bold">
-                                        @allSizes[i].Value
+                        <input type="hidden" asp-for="BrandId" />
+                        <input type="hidden" asp-for="CategoryId" />
+
+                        <div class="row g-4">
+                            <div class="col-md-7 border-end">
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase">Основна інформація</h5>
+
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
+                                    <input asp-for="Name" class="form-control form-control-lg" required placeholder="Наприклад: Nike Air Force 1 '07" />
+                                    <span asp-validation-for="Name" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="SKU" class="form-label fw-bold">Артикул (SKU)</label>
+                                        <input asp-for="SKU" class="form-control" placeholder="CW2288-111" required />
                                     </div>
-                                    <div class="card-body p-2">
-                                        <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
-                                        <input type="number" name="Variants[@i].QuantityInStock"
-                                               class="form-control form-control-sm text-center"
-                                               value="0" min="0" />
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Price" class="form-label fw-bold">Ціна (₴)</label>
+                                        <div class="input-group">
+                                            <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
+                                            <span class="input-group-text">₴</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="col-12 text-center text-danger">
-                            Помилка: Розміри не завантажені. Перезавантажте сторінку.
-                        </div>
-                    }
-                </div>
 
-                <div class="text-end mt-4">
-                    <a asp-controller="Brand" asp-action="Index" class="btn btn-outline-secondary me-2">Скасувати</a>
-                    <button type="submit" class="btn btn-success px-5 fw-bold shadow">Зберегти товар</button>
+                                <div class="mb-3">
+                                    <label asp-for="Gender" class="form-label fw-bold">Категорія статі</label>
+                                    <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label fw-bold">Опис товару</label>
+                                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="Розкажіть про матеріали..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase">Медіафайли</h5>
+
+                                <div class="card bg-light border-dashed p-4 text-center mb-3">
+                                    <label class="form-label fw-bold d-block mb-3">Головне фото</label>
+                                    <div id="imagePreviewContainer" class="mb-3 d-none">
+                                        <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 250px; object-fit: cover;" />
+                                    </div>
+
+                                    <div id="placeholderIcon">
+                                        <i class="bi bi-cloud-arrow-up display-4 text-muted mb-2"></i>
+                                    </div>
+
+                                    <input type="file" name="uploadedImage" id="imageInput" class="form-control" accept="image/*" required />
+                                    <div class="form-text mt-2 small">Рекомендовано: квадратне фото</div>
+                                </div>
+
+                                <div class="alert alert-info small border-0 shadow-sm">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    Додаткові фото можна буде завантажити пізніше.
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5" />
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold m-0 text-muted small text-uppercase">Розмірна сітка</h5>
+                        </div>
+
+                        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+                            @if (allSizes != null && allSizes.Any())
+                            {
+                                for (int i = 0; i < allSizes.Count; i++)
+                                {
+                                    <div class="col">
+                                        <div class="card h-100 border-0 shadow-sm text-center">
+                                            <div class="card-header py-1 bg-light border-bottom-0">
+                                                <div class="fw-bolder fs-5 text-dark">@allSizes[i].Value</div>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
+                                                <input type="number" name="Variants[@i].QuantityInStock"
+                                                       class="form-control form-control-sm text-center border-0 bg-light fw-bold"
+                                                       value="0" min="0" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <div class="mt-5 pt-4 border-top d-flex justify-content-between">
+                            <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-outline-secondary px-4 rounded-pill">Назад</a>
+                            <button type="submit" class="btn btn-dark btn-lg px-5 rounded-pill shadow-sm fw-bold">Зберегти</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById('imageInput').onchange = function (evt) {
+            const [file] = this.files;
+            if (file) {
+                const preview = document.getElementById('imagePreview');
+                const container = document.getElementById('imagePreviewContainer');
+                const icon = document.getElementById('placeholderIcon');
+
+                preview.src = URL.createObjectURL(file);
+                container.classList.remove('d-none');
+                icon.classList.add('d-none');
+            }
+        };
+    </script>
+}
+
+<style>
+    .border-dashed {
+        border: 2px dashed #dee2e6 !important;
+    }
+
+    .form-control:focus {
+        border-color: #212529;
+        box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.1);
+    }
+</style>
