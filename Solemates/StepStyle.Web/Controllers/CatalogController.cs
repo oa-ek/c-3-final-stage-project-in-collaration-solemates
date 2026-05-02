@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StepStyle.Web.Controllers
 {
-    [AllowAnonymous] 
+    [AllowAnonymous]
     public class CatalogController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,8 +31,10 @@ namespace StepStyle.Web.Controllers
             var product = await _context.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
-                .Include(p => p.Variants) 
+                .Include(p => p.Variants)
                     .ThenInclude(v => v.Size)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.User) 
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null) return NotFound();
