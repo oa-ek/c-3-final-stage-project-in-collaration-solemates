@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
+using StepStyle.Web.Services.ExternalApi;
 
 namespace StepStyle.Web.Controllers
 {
@@ -19,19 +20,25 @@ namespace StepStyle.Web.Controllers
         private readonly IGenericRepository<Size> _sizeRepository;
         private readonly IGenericRepository<Category> _categoryRepository;
         private readonly IGenericRepository<ProductVariant> _variantRepository;
+        private readonly IExchangeRateService _exchangeRateService;
+        private readonly IPexelsService _pexelsService;
 
         public ProductController(
             IGenericRepository<Product> productRepository,
             IGenericRepository<Brand> brandRepository,
             IGenericRepository<Size> sizeRepository,
             IGenericRepository<Category> categoryRepository,
-            IGenericRepository<ProductVariant> variantRepository)
+            IGenericRepository<ProductVariant> variantRepository,
+            IExchangeRateService exchangeRateService,
+            IPexelsService pexelsService)
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
             _sizeRepository = sizeRepository;
             _categoryRepository = categoryRepository;
             _variantRepository = variantRepository;
+            _exchangeRateService = exchangeRateService;
+            _pexelsService = pexelsService;
         }
 
         [AllowAnonymous]
@@ -49,6 +56,24 @@ namespace StepStyle.Web.Controllers
 
             var allVariants = await _variantRepository.GetAllIncludeAsync(v => v.Size);
             product.Variants = allVariants.Where(v => v.ProductId == id).ToList();
+
+            var rates = await _exchangeRateService.GetExchangeRatesAsync();
+
+            var usdRate = rates?.FirstOrDefault(r => r.Cc == "USD")?.Rate ?? 0m;
+            var eurRate = rates?.FirstOrDefault(r => r.Cc == "EUR")?.Rate ?? 0m;
+
+            if (usdRate > 0m)
+            {
+                ViewBag.UsdPrice = (product.Price / usdRate).ToString("F2");
+            }
+
+            if (eurRate > 0m)
+            {
+                ViewBag.EurPrice = (product.Price / eurRate).ToString("F2");
+            }
+            // ----------------------------------------------
+
+            ViewBag.PexelsPhotos = await _pexelsService.SearchPhotosAsync("sneakers", 3);
 
             return View(product);
         }
