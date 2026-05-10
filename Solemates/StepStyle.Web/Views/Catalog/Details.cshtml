@@ -5,6 +5,13 @@
     var mainImage = Model.Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl
                     ?? Model.Images?.FirstOrDefault()?.ImageUrl
                     ?? "/images/no-image.png";
+
+    // Отримуємо курси валют з контролера (якщо вони передані), інакше 0
+    decimal usdRate = ViewData["UsdRate"] != null ? Convert.ToDecimal(ViewData["UsdRate"]) : 0m;
+    decimal eurRate = ViewData["EurRate"] != null ? Convert.ToDecimal(ViewData["EurRate"]) : 0m;
+
+    decimal priceUsd = usdRate > 0 ? Model.Price / usdRate : 0m;
+    decimal priceEur = eurRate > 0 ? Model.Price / eurRate : 0m;
 }
 
 <div class="container my-5">
@@ -64,10 +71,19 @@
                         <h2 class="text-dark fw-bolder m-0">@Model.Price.ToString("N0") ₴</h2>
                     </div>
 
-                    <div class="mt-1 text-muted" style="font-size: 0.95rem; font-weight: 500;">
-                        <span class="me-3"><i class="bi bi-currency-dollar"></i> ~ 185.50 USD</span>
-                        <span><i class="bi bi-currency-euro"></i> ~ 170.20 EUR</span>
-                    </div>
+                    @if (priceUsd > 0 || priceEur > 0)
+                    {
+                        <div class="mt-1 text-muted" style="font-size: 0.95rem; font-weight: 500;">
+                            @if (priceUsd > 0)
+                            {
+                                <span class="me-3"><i class="bi bi-currency-dollar"></i> ~ @priceUsd.ToString("N2") USD</span>
+                            }
+                            @if (priceEur > 0)
+                            {
+                                <span><i class="bi bi-currency-euro"></i> ~ @priceEur.ToString("N2") EUR</span>
+                            }
+                        </div>
+                    }
                 </div>
 
                 <hr class="my-4 opacity-10">

@@ -82,10 +82,19 @@
 
                 <h3 class="text-dark fw-bold mb-0">@Model.Price.ToString("N0") ₴</h3>
 
-                <div class="mt-1 mb-4 text-muted" style="font-size: 0.95rem; font-weight: 500;">
-                    <span class="me-3"><i class="bi bi-currency-dollar"></i> ~ 185.50 USD</span>
-                    <span><i class="bi bi-currency-euro"></i> ~ 170.20 EUR</span>
-                </div>
+                @if (ViewBag.UsdPrice != null || ViewBag.EurPrice != null)
+                {
+                    <div class="mt-1 mb-4 text-muted" style="font-size: 0.95rem; font-weight: 500;">
+                        @if (ViewBag.UsdPrice != null)
+                        {
+                            <span class="me-3"><i class="bi bi-currency-dollar"></i> ~ @ViewBag.UsdPrice USD</span>
+                        }
+                        @if (ViewBag.EurPrice != null)
+                        {
+                            <span><i class="bi bi-currency-euro"></i> ~ @ViewBag.EurPrice EUR</span>
+                        }
+                    </div>
+                }
 
                 <hr class="my-4 opacity-10">
 
@@ -163,8 +172,14 @@
                             </div>
                             
                             <div class="text-warning mb-3 small">
-                                @for (int i = 0; i < review.Rating; i++) { <i class="bi bi-star-fill"></i> }
-                                @for (int i = review.Rating; i < 5; i++) { <i class="bi bi-star text-muted opacity-25"></i> }
+                                @for (int i = 0; i < review.Rating; i++)
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                @for (int i = review.Rating; i < 5; i++)
+                                {
+                                    <i class="bi bi-star text-muted opacity-25"></i>
+                                }
                             </div>
                             
                             <p class="mb-3 text-secondary lh-lg">@userText</p>

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using StepStyle.Web.Services.ExternalApi;
 
 namespace StepStyle.Web.Controllers
 {
@@ -16,11 +17,19 @@ namespace StepStyle.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IExchangeRateService _exchangeRateService;
+        private readonly ICountryService _countryService;
 
-        public BrandController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        public BrandController(
+            ApplicationDbContext context,
+            IWebHostEnvironment webHostEnvironment,
+            IExchangeRateService exchangeRateService,
+            ICountryService countryService)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _exchangeRateService = exchangeRateService;
+            _countryService = countryService;
         }
 
         [AllowAnonymous]
@@ -30,6 +39,8 @@ namespace StepStyle.Web.Controllers
                 .Include(b => b.Products)
                     .ThenInclude(p => p.Images)
                 .ToListAsync();
+
+            ViewBag.ExchangeRates = await _exchangeRateService.GetExchangeRatesAsync();
 
             return View(brands);
         }
@@ -57,6 +68,8 @@ namespace StepStyle.Web.Controllers
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (brand == null) return NotFound();
+
+            ViewBag.CountryInfo = await _countryService.GetCountryByNameAsync("usa");
 
             return View(brand);
         }
@@ -117,7 +130,6 @@ namespace StepStyle.Web.Controllers
             return View(brand);
         }
 
-        // GET: Brand/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -128,8 +140,7 @@ namespace StepStyle.Web.Controllers
             return View(brand);
         }
 
-        // POST: Brand/Delete/5
-        [HttpPost, ActionName("DeleteConfirmed")] // Важливо: ActionName зв'язує назву з формою
+        [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -139,7 +150,6 @@ namespace StepStyle.Web.Controllers
 
             if (brand != null)
             {
-                // Якщо хочеш видаляти бренд навіть якщо є товари (будь обережна!)
                 _context.Brands.Remove(brand);
                 await _context.SaveChangesAsync();
             }
