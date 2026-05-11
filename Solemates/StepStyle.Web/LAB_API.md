@@ -5,19 +5,22 @@
 ## Використані зовнішні API
 | API | Endpoint | Отримані дані | Кешування |
 |---|---|---|---|
-| NBU API | `/NBUStatService/v1/statdirectory/exchange?json` | курс USD та EUR | 1 год |
-| REST Countries | `/v3.1/name/...` | прапор країни бренду | 24 год |
-| Pexels API | `/v1/search?query=...` | тематичне фото категорії взуття | 24 год |
+| **NBU API** | `/NBUStatService/v1/statdirectory/exchange?json` | курс USD та EUR | 1 год (MemoryCache) |
+| **REST Countries** | `/v3.1/name/...` | прапор країни бренду та офіційна назва | 24 год |
+| **Pexels API** | `/v1/search?query=...` | тематичні фото бренду або категорії взуття | 24 год |
 
 ## Fallback-стратегії
-- NBU API недоступний → ціна відображається лише в гривнях, блок з валютами приховується
-- REST Countries недоступний → прапор не відображається, залишається лише назва бренду
-- Pexels API недоступний → показуємо стандартний банер магазину замість тематичного фото
+- **NBU API недоступний** → ціна відображається лише в гривнях, блок USD/EUR автоматично приховується.
+- **REST Countries недоступний** → прапор не відображається, залишається лише назва бренду.
+- **Pexels API недоступний** → секція «Естетика бренду» приховується або показується стандартне зображення магазину без «битих» картинок.
+
 
 ## Власний Web API
-- Controller: `ProductsApiController`
-- Swagger: `/swagger`
-- Тест: `GET /api/products`
+Для інтеграції з іншими системами реалізовано внутрішній Web API.
+- **Controller:** `ProductsApiController`
+- **Swagger UI:** `/swagger`
+- **Endpoint:** `GET /api/products`
+- **Призначення:** отримання списку товарів у форматі JSON.
 
 ## Як запустити
 1. Скопіювати `appsettings.Development.json.example` → `appsettings.Development.json`

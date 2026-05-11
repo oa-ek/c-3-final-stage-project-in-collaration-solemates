@@ -1,10 +1,14 @@
 ﻿@model StepStyle.Web.Models.Product
+@using StepStyle.Web.Models.DTOs
 
 @{
     ViewData["Title"] = Model.Name;
     var mainImage = Model.Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl
                     ?? Model.Images?.FirstOrDefault()?.ImageUrl
                     ?? "/images/no-image.png";
+
+    var countryInfo = ViewBag.CountryInfo as CountryDto;
+    var pexelsData = ViewBag.PexelsPhotos as PexelsDto; 
 }
 
 <div class="container my-5">
@@ -24,7 +28,7 @@
         <div class="alert alert-dark border-0 shadow-sm d-flex justify-content-between align-items-center rounded-4 mb-4">
             <div>
                 <i class="bi bi-person-badge me-2"></i>
-                <strong>Панель адміністратора:</strong> Ви переглядаєте цей товар як модератор.
+                <strong>Панель адміністратора:</strong> Модерація товару увімкнена.
             </div>
             <div class="btn-group">
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm px-3 rounded-pill me-2">
@@ -51,7 +55,7 @@
     <div class="row g-5">
         <div class="col-md-7">
             <div class="card border-0 shadow-sm overflow-hidden rounded-4">
-                <img src="@mainImage" class="img-fluid w-100" style="object-fit: cover; min-height: 500px; max-height: 700px;" alt="@Model.Name" onerror="this.src='/images/no-image.png'">
+                <img id="mainViewImage" src="@mainImage" class="img-fluid w-100" style="object-fit: cover; min-height: 500px; max-height: 700px;" alt="@Model.Name" onerror="this.src='/images/no-image.png'">
             </div>
 
             @if (Model.Images?.Count > 1)
@@ -59,7 +63,7 @@
                 <div class="d-flex mt-3 gap-2 overflow-auto pb-2">
                     @foreach (var img in Model.Images)
                     {
-                        <img src="@img.ImageUrl" class="rounded border cursor-pointer thumb-img" style="width: 80px; height: 80px; object-fit: cover;" onclick="this.parentElement.parentElement.querySelector('img').src=this.src" />
+                        <img src="@img.ImageUrl" class="rounded border cursor-pointer thumb-img" style="width: 80px; height: 80px; object-fit: cover;" onclick="document.getElementById('mainViewImage').src=this.src" />
                     }
                 </div>
             }
@@ -67,39 +71,46 @@
 
         <div class="col-md-5">
             <div class="ps-md-4">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <span class="badge bg-dark me-1">@Model.Brand?.Name</span>
-                        <img src="https://flagcdn.com/w20/de.png" alt="Country Flag" style="width: 20px; border-radius: 2px; vertical-align: baseline; box-shadow: 0 0 2px rgba(0,0,0,0.3);" title="Країна бренду" />
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark px-3 py-2">@Model.Brand?.Name</span>
+
+                        @if (countryInfo != null)
+                        {
+                            <div class="d-flex align-items-center bg-white border rounded-pill px-2 py-1 shadow-sm">
+                                <img src="@countryInfo.Flags?.Png" style="width: 18px; height: auto;" class="rounded-1 me-1" />
+                                <span class="small fw-bold text-dark" style="font-size: 0.7rem;">@countryInfo.Name?.Common</span>
+                            </div>
+                        }
                     </div>
-                    <div>
-                        <span class="badge bg-light text-dark border">Арт: @Model.SKU</span>
-                        <span class="text-muted small ms-1">@Model.Gender</span>
-                    </div>
+                    <span class="badge bg-light text-dark border small">Арт: @Model.SKU</span>
                 </div>
 
                 <h1 class="display-5 fw-bold mb-2">@Model.Name</h1>
 
-                <h3 class="text-dark fw-bold mb-0">@Model.Price.ToString("N0") ₴</h3>
 
-                @if (ViewBag.UsdPrice != null || ViewBag.EurPrice != null)
-                {
-                    <div class="mt-1 mb-4 text-muted" style="font-size: 0.95rem; font-weight: 500;">
-                        @if (ViewBag.UsdPrice != null)
-                        {
-                            <span class="me-3"><i class="bi bi-currency-dollar"></i> ~ @ViewBag.UsdPrice USD</span>
-                        }
-                        @if (ViewBag.EurPrice != null)
-                        {
-                            <span><i class="bi bi-currency-euro"></i> ~ @ViewBag.EurPrice EUR</span>
-                        }
-                    </div>
-                }
+                <div class="mb-3">
+                    <h3 class="text-dark fw-bold mb-0">@(((decimal)Model.Price).ToString("N0")) ₴</h3>
+
+                    @if (ViewBag.UsdPrice != null || ViewBag.EurPrice != null)
+                    {
+                        <div class="text-muted small mt-1 fw-medium">
+                            @if (ViewBag.UsdPrice != null)
+                            {
+                                <span class="me-3"><i class="bi bi-currency-dollar"></i> @ViewBag.UsdPrice USD</span>
+                            }
+                            @if (ViewBag.EurPrice != null)
+                            {
+                                <span><i class="bi bi-currency-euro"></i> @ViewBag.EurPrice EUR</span>
+                            }
+                        </div>
+                    }
+                </div>
 
                 <hr class="my-4 opacity-10">
 
-                <div class="mb-5">
-                    <h5 class="fw-bold mb-3 small text-uppercase letter-spacing-1">Доступні розміри:</h5>
+                <div class="mb-4">
+                    <h6 class="fw-bold text-uppercase small letter-spacing-1 mb-3">Оберіть розмір:</h6>
                     <div class="d-flex flex-wrap gap-2">
                         @if (Model.Variants != null && Model.Variants.Any(v => v.QuantityInStock > 0))
                         {
@@ -112,45 +123,57 @@
                         }
                         else
                         {
-                            <div class="alert alert-secondary w-100 py-2">
-                                <i class="bi bi-info-circle me-2"></i>Тимчасово відсутній
-                            </div>
+                            <div class="alert alert-secondary w-100 py-2 small"><i class="bi bi-info-circle me-2"></i>Тимчасово розпродано</div>
                         }
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <h5 class="fw-bold mb-2 small text-uppercase letter-spacing-1">Опис:</h5>
-                    <p class="text-secondary lh-lg" style="white-space: pre-line;">
-                        @Model.Description
-                    </p>
+                    <h6 class="fw-bold text-uppercase small letter-spacing-1 mb-2">Опис моделі:</h6>
+                    <p class="text-secondary lh-lg" style="white-space: pre-line; font-size: 0.95rem;">@Model.Description</p>
                 </div>
 
-                <div class="mb-4">
-                    <div class="card text-white border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; height: 100px; background-color: #000;">
-                        <img src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800" class="card-img" alt="Атмосфера" style="object-fit: cover; opacity: 0.5; transform: translateY(-30px);">
-                        <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center text-center p-2">
-                            <h6 class="card-title fw-bold text-uppercase mb-0" style="letter-spacing: 2px; font-size: 0.9rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Відчуй свій рух</h6>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-grid gap-2 pt-3">
-                    <button class="btn btn-dark btn-lg py-3 rounded-pill fw-bold shadow" disabled>
-                        <i class="bi bi-cart-plus me-2"></i> Додати в кошик
+                <div class="d-grid gap-2 pt-2">
+                    <button class="btn btn-dark btn-lg py-3 rounded-pill fw-bold shadow-sm" @(Model.Variants?.Any(v => v.QuantityInStock > 0) == true ? "" : "disabled")>
+                        ДОДАТИ В КОШИК
                     </button>
-                    <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-link text-decoration-none text-muted mt-2">
-                        <i class="bi bi-arrow-left me-1"></i> До колекції @Model.Brand?.Name
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 
+    @if (pexelsData?.Photos != null && pexelsData.Photos.Any())
+    {
+        <div class="row mt-5 pt-5">
+            <div class="col-12 text-center mb-4">
+                <h4 class="fw-bold text-uppercase letter-spacing-1">Естетика @Model.Brand?.Name</h4>
+                <p class="text-muted small">Натхнення вашим стилем • Powered by Pexels</p>
+            </div>
+            <div class="col-12">
+                <div class="row g-3">
+                    @foreach (var photo in pexelsData.Photos.Take(3))
+                    {
+                        <div class="col-md-4">
+                            <div class="position-relative overflow-hidden rounded-4 shadow-sm" style="height: 300px;">
+                                <img src="@photo.Src?.Large" class="w-100 h-100" style="object-fit: cover;" alt="@photo.Alt">
+                                <div class="position-absolute bottom-0 start-0 p-3 text-white w-100" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                                    <small style="font-size: 0.65rem;">Ph: @photo.Photographer</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="row mt-5 pt-4 border-top">
         <div class="col-12">
-            <h3 class="fw-bold mb-4">Відгуки клієнтів</h3>
-            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">Відгуки клієнтів</h3>
+                <span class="badge bg-light text-dark border">Всього: @(Model.Reviews?.Count ?? 0)</span>
+            </div>
+
             @if (Model.Reviews != null && Model.Reviews.Any())
             {
                 <div class="d-flex flex-column gap-4">
@@ -160,37 +183,32 @@
                         var userText = parts[0];
                         var adminReply = parts.Length > 1 ? parts[1].Trim() : null;
 
-                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-light mb-2">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="fw-bold text-dark d-flex align-items-center">
-                                    <div class="bg-dark text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 35px; height: 35px; font-size: 0.9rem;">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-dark text-white rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 40px; height: 40px; font-weight: 600;">
                                         @(review.User?.UserName?.Substring(0, 1).ToUpper() ?? "U")
                                     </div>
-                                    @(review.User?.UserName ?? "Користувач")
+                                    <div>
+                                        <div class="fw-bold">@(review.User?.UserName ?? "Користувач")</div>
+                                        <div class="text-warning small" style="font-size: 0.7rem;">
+                                            @for (int i = 0; i < 5; i++)
+                                            {
+                                                <i class="bi bi-star@(i < review.Rating ? "-fill" : "")"></i>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-muted small">@review.DatePosted.ToString("dd.MM.yyyy HH:mm")</div>
+                                <div class="text-muted small">@review.DatePosted.ToString("dd.MM.yyyy")</div>
                             </div>
-                            
-                            <div class="text-warning mb-3 small">
-                                @for (int i = 0; i < review.Rating; i++)
-                                {
-                                    <i class="bi bi-star-fill"></i>
-                                }
-                                @for (int i = review.Rating; i < 5; i++)
-                                {
-                                    <i class="bi bi-star text-muted opacity-25"></i>
-                                }
-                            </div>
-                            
-                            <p class="mb-3 text-secondary lh-lg">@userText</p>
+
+                            <p class="mt-2 mb-3 text-secondary" style="font-size: 0.95rem;">@userText</p>
 
                             @if (!string.IsNullOrEmpty(adminReply))
                             {
                                 <div class="bg-white p-3 rounded-3 border-start border-4 border-dark mt-2 shadow-sm">
-                                    <div class="fw-bold small mb-2 d-flex align-items-center">
-                                        <i class="bi bi-shield-check text-success me-2"></i> Відповідь магазину:
-                                    </div>
-                                    <p class="text-muted mb-0 small lh-lg">@adminReply</p>
+                                    <div class="fw-bold small mb-1"><i class="bi bi-shield-check text-success me-1"></i> Відповідь магазину:</div>
+                                    <p class="text-muted mb-0 small">@adminReply</p>
                                 </div>
                             }
 
@@ -199,8 +217,8 @@
                                 <form asp-controller="Review" asp-action="Reply" method="post" class="mt-3 border-top pt-3">
                                     <input type="hidden" name="ReviewId" value="@review.Id" />
                                     <div class="input-group">
-                                        <textarea name="ReplyText" class="form-control border-0 shadow-sm rounded-start-3" rows="1" placeholder="@(string.IsNullOrEmpty(adminReply) ? "Написати відповідь..." : "Змінити відповідь...")" required></textarea>
-                                        <button type="submit" class="btn btn-dark fw-bold px-4 rounded-end-3">Відповісти</button>
+                                        <textarea name="ReplyText" class="form-control border-0 shadow-sm rounded-start-3" rows="1" placeholder="Ваша відповідь..."></textarea>
+                                        <button type="submit" class="btn btn-dark px-3 rounded-end-3">Відправити</button>
                                     </div>
                                 </form>
                             }
@@ -211,9 +229,9 @@
             else
             {
                 <div class="text-center py-5 bg-light rounded-4 border border-dashed">
-                    <i class="bi bi-chat-left-dots text-muted opacity-25 mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="text-muted fw-bold">Ще немає відгуків</h5>
-                    <p class="text-secondary small mb-0">Тут будуть відображатися відгуки покупців.</p>
+                    <i class="bi bi-chat-left-dots text-muted opacity-25 mb-2" style="font-size: 2.5rem;"></i>
+                    <h6 class="text-muted fw-bold">Відгуків поки немає</h6>
+                    <p class="text-secondary small mb-0">Будьте першим, хто поділиться враженнями!</p>
                 </div>
             }
         </div>
@@ -227,24 +245,36 @@
     }
 
         .cursor-pointer:hover {
-            border-color: #000 !important;
-            transform: scale(1.05);
+            transform: translateY(-3px);
         }
 
     .letter-spacing-1 {
         letter-spacing: 1px;
     }
 
-    .size-badge:hover {
-        background-color: #000;
-        color: #fff;
+    .size-badge {
+        transition: 0.2s;
+        cursor: pointer;
+        min-width: 50px;
+        text-align: center;
     }
+
+        .size-badge:hover {
+            background-color: #212529;
+            color: #fff;
+        }
 
     .thumb-img {
         border: 2px solid transparent;
+        transition: 0.2s;
     }
 
         .thumb-img:hover {
             border-color: #212529;
         }
+
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
 </style>

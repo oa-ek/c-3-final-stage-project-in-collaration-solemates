@@ -1,14 +1,43 @@
 ﻿@model StepStyle.Web.Models.Brand
+@using StepStyle.Web.Models.DTOs
 
 @{
     ViewData["Title"] = Model.Name;
     var detailsController = User.IsInRole("Admin") ? "Product" : "Catalog";
+    var countryInfo = ViewBag.CountryInfo as CountryDto;
 }
 
 <header class="bg-dark py-4 mb-5 shadow-sm">
     <div class="container px-4 px-lg-5 my-2">
         <div class="text-center text-white">
-            <h1 class="display-5 fw-bolder text-uppercase">@Model.Name</h1>
+            <h1 class="display-5 fw-bolder text-uppercase mb-2">@Model.Name</h1>
+
+            <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                @if (countryInfo != null)
+                {
+                    <div class="badge bg-light text-dark rounded-pill px-3 py-2 d-flex align-items-center shadow-sm">
+                        @if (countryInfo.Flags?.Png != null)
+                        {
+                            <img src="@countryInfo.Flags.Png" alt="Flag" style="width: 20px; height: auto;" class="me-2 rounded-1" />
+                        }
+                        <span class="small fw-bold">@countryInfo.Name?.Common</span>
+
+                        @if (countryInfo.Currencies != null && countryInfo.Currencies.Any())
+                        {
+                            <span class="ms-1 text-muted small">
+                                (@string.Join(", ", countryInfo.Currencies.Select(c => c.Value.Symbol)))
+                            </span>
+                        }
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(Model.Country))
+                {
+                    <span class="badge border border-light rounded-pill px-3 py-2 small">
+                        <i class="bi bi-geo-alt me-1"></i> @Model.Country
+                    </span>
+                }
+            </div>
+
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a asp-action="Index" class="text-white-50 text-decoration-none small">Каталог брендів</a></li>
@@ -24,9 +53,14 @@
         <h2 class="fw-bold m-0">Колекція бренду</h2>
         @if (User.IsInRole("Admin"))
         {
-            <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-sm rounded-pill px-4 shadow-sm">
-                <i class="bi bi-plus-lg me-1"></i> Додати нову пару
-            </a>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-dark btn-sm rounded-pill px-4">
+                    <i class="bi bi-pencil me-1"></i> Редагувати бренд
+                </a>
+                <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-sm rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Додати нову пару
+                </a>
+            </div>
         }
     </div>
 
@@ -117,5 +151,10 @@
 
     .breadcrumb-item + .breadcrumb-item::before {
         color: rgba(255,255,255,0.5);
+    }
+
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
     }
 </style>

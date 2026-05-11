@@ -22,6 +22,7 @@ namespace StepStyle.Web.Controllers
         private readonly IGenericRepository<ProductVariant> _variantRepository;
         private readonly IExchangeRateService _exchangeRateService;
         private readonly IPexelsService _pexelsService;
+        private readonly ICountryService _countryService;
 
         public ProductController(
             IGenericRepository<Product> productRepository,
@@ -30,7 +31,8 @@ namespace StepStyle.Web.Controllers
             IGenericRepository<Category> categoryRepository,
             IGenericRepository<ProductVariant> variantRepository,
             IExchangeRateService exchangeRateService,
-            IPexelsService pexelsService)
+            IPexelsService pexelsService,
+            ICountryService countryService)
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
@@ -39,6 +41,7 @@ namespace StepStyle.Web.Controllers
             _variantRepository = variantRepository;
             _exchangeRateService = exchangeRateService;
             _pexelsService = pexelsService;
+            _countryService = countryService;
         }
 
         [AllowAnonymous]
@@ -47,33 +50,28 @@ namespace StepStyle.Web.Controllers
         {
             var products = await _productRepository.GetAllIncludeAsync(
                 p => p.Images,
-                p => p.Brand
+                p => p.Brand,
+                p => p.Reviews
             );
 
             var product = products.FirstOrDefault(p => p.Id == id);
-
             if (product == null) return NotFound();
 
+            if (!string.IsNullOrEmpty(product.Brand?.Country))
+            {
+                ViewBag.CountryInfo = await _countryService.GetCountryByNameAsync(product.Brand.Country);
+            }
             var allVariants = await _variantRepository.GetAllIncludeAsync(v => v.Size);
             product.Variants = allVariants.Where(v => v.ProductId == id).ToList();
 
             var rates = await _exchangeRateService.GetExchangeRatesAsync();
-
             var usdRate = rates?.FirstOrDefault(r => r.Cc == "USD")?.Rate ?? 0m;
             var eurRate = rates?.FirstOrDefault(r => r.Cc == "EUR")?.Rate ?? 0m;
 
-            if (usdRate > 0m)
-            {
-                ViewBag.UsdPrice = (product.Price / usdRate).ToString("F2");
-            }
+            if (usdRate > 0m) ViewBag.UsdPrice = (product.Price / usdRate).ToString("F2");
+            if (eurRate > 0m) ViewBag.EurPrice = (product.Price / eurRate).ToString("F2");
 
-            if (eurRate > 0m)
-            {
-                ViewBag.EurPrice = (product.Price / eurRate).ToString("F2");
-            }
-            // ----------------------------------------------
-
-            ViewBag.PexelsPhotos = await _pexelsService.SearchPhotosAsync("sneakers", 3);
+            ViewBag.PexelsPhotos = await _pexelsService.SearchPhotosAsync(product.Name ?? "sneakers", 3);
 
             return View(product);
         }
@@ -83,20 +81,8 @@ namespace StepStyle.Web.Controllers
         {
             var brand = await _brandRepository.GetByIdAsync(brandId);
             if (brand == null) return NotFound();
-            var existingSizes = await _sizeRepository.GetAllAsync();
 
-            if (existingSizes.Count() < 10)
-            {
-                for (int i = 18; i <= 45; i++)
-                {
-                    if (!existingSizes.Any(s => s.Value == i.ToString()))
-                    {
-                        await _sizeRepository.AddAsync(new Size { Value = i.ToString() });
-                    }
-                }
-                existingSizes = await _sizeRepository.GetAllAsync();
-            }
-
+            await EnsureSizesExist();
             var categories = await _categoryRepository.GetAllAsync();
 
             var product = new Product
@@ -108,7 +94,6 @@ namespace StepStyle.Web.Controllers
             };
 
             await PrepareViewBag(brandId);
-
             return View(product);
         }
 
@@ -116,43 +101,35 @@ namespace StepStyle.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product, IFormFile uploadedImage)
         {
-            if (product.Variants == null)
-                product.Variants = new List<ProductVariant>();
-
+            product.Variants ??= new List<ProductVariant>();
             CleanProductModelState(product);
 
             if (ModelState.IsValid)
             {
-                try
+                if (string.IsNullOrWhiteSpace(product.SKU))
+                    product.SKU = "ART-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+
+                if (uploadedImage != null && uploadedImage.Length > 0)
                 {
-                    if (string.IsNullOrWhiteSpace(product.SKU))
-                        product.SKU = "ART-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
-
-                    if (uploadedImage != null && uploadedImage.Length > 0)
-                    {
-                        product.Images = new List<ProductImage> { await SaveImage(uploadedImage) };
-                    }
-
-                    var validVariants = product.Variants
-                        .Where(v => v != null && v.QuantityInStock > 0 && v.SizeId > 0)
-                        .ToList();
-
-                    product.Variants = null;
-
-                    await _productRepository.AddAsync(product);
-                    foreach (var variant in validVariants)
-                    {
-                        variant.ProductId = product.Id;
-                        variant.Id = 0;
-                        await _variantRepository.AddAsync(variant);
-                    }
-
-                    return RedirectToAction("Details", "Brand", new { id = product.BrandId });
+                    product.Images = new List<ProductImage> { await SaveImage(uploadedImage) };
                 }
-                catch (Exception ex)
+
+                var validVariants = product.Variants
+                    .Where(v => v != null && v.QuantityInStock > 0 && v.SizeId > 0)
+                    .ToList();
+
+                product.Variants = null;
+
+                await _productRepository.AddAsync(product);
+
+                foreach (var variant in validVariants)
                 {
-                    ModelState.AddModelError("", "Помилка бази: " + ex.Message);
+                    variant.ProductId = product.Id;
+                    variant.Id = 0;
+                    await _variantRepository.AddAsync(variant);
                 }
+
+                return RedirectToAction("Details", "Brand", new { id = product.BrandId });
             }
 
             await PrepareViewBag(product.BrandId);
@@ -164,7 +141,6 @@ namespace StepStyle.Web.Controllers
         {
             var products = await _productRepository.GetAllIncludeAsync(p => p.Images);
             var product = products.FirstOrDefault(p => p.Id == id);
-
             if (product == null) return NotFound();
 
             var allVariants = await _variantRepository.GetAllAsync();
@@ -178,70 +154,42 @@ namespace StepStyle.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Product product, IFormFile? uploadedImage, int? ExistingImageId, string? ExistingImageUrl)
         {
-            if (product.Variants == null)
-                product.Variants = new List<ProductVariant>();
-
+            product.Variants ??= new List<ProductVariant>();
             CleanProductModelState(product);
 
             if (ModelState.IsValid)
             {
-                try
+                var allVariants = await _variantRepository.GetAllAsync();
+                var oldVariants = allVariants.Where(v => v.ProductId == product.Id).ToList();
+                foreach (var old in oldVariants) await _variantRepository.DeleteAsync(old.Id);
+
+                var validVariants = product.Variants
+                    .Where(v => v != null && v.QuantityInStock > 0 && v.SizeId > 0)
+                    .ToList();
+
+                foreach (var variant in validVariants)
                 {
-                    var allVariants = await _variantRepository.GetAllAsync();
-                    var oldVariants = allVariants.Where(v => v.ProductId == product.Id).ToList();
-
-                    foreach (var old in oldVariants)
-                    {
-                        await _variantRepository.DeleteAsync(old.Id);
-                    }
-
-                    var validVariants = product.Variants
-                        .Where(v => v != null && v.QuantityInStock > 0 && v.SizeId > 0)
-                        .ToList();
-
-                    foreach (var variant in validVariants)
-                    {
-                        variant.ProductId = product.Id;
-                        variant.Id = 0;
-                        await _variantRepository.AddAsync(variant);
-                    }
-
-                    if (uploadedImage != null && uploadedImage.Length > 0)
-                    {
-                        var newImage = await SaveImage(uploadedImage);
-                        if (ExistingImageId.HasValue && ExistingImageId.Value > 0)
-                        {
-                            newImage.Id = ExistingImageId.Value;
-                            newImage.ProductId = product.Id;
-                        }
-
-                        product.Images = new List<ProductImage> { newImage };
-                    }
-                    else if (!string.IsNullOrEmpty(ExistingImageUrl))
-                    {
-                        product.Images = new List<ProductImage>
-                        {
-                            new ProductImage
-                            {
-                                Id = ExistingImageId ?? 0,
-                                ImageUrl = ExistingImageUrl,
-                                IsMain = true,
-                                ProductId = product.Id
-                            }
-                        };
-                    }
-
-                    var currentVariants = product.Variants;
-                    product.Variants = null;
-
-                    await _productRepository.UpdateAsync(product);
-                    return RedirectToAction("Details", "Brand", new { id = product.BrandId });
+                    variant.ProductId = product.Id;
+                    variant.Id = 0;
+                    await _variantRepository.AddAsync(variant);
                 }
-                catch (Exception ex)
+
+                if (uploadedImage != null && uploadedImage.Length > 0)
                 {
-                    ModelState.AddModelError("", "Помилка оновлення: " + ex.Message);
+                    var newImage = await SaveImage(uploadedImage);
+                    if (ExistingImageId > 0) { newImage.Id = ExistingImageId.Value; newImage.ProductId = product.Id; }
+                    product.Images = new List<ProductImage> { newImage };
                 }
+                else if (!string.IsNullOrEmpty(ExistingImageUrl))
+                {
+                    product.Images = new List<ProductImage> { new ProductImage { Id = ExistingImageId ?? 0, ImageUrl = ExistingImageUrl, IsMain = true, ProductId = product.Id } };
+                }
+
+                product.Variants = null;
+                await _productRepository.UpdateAsync(product);
+                return RedirectToAction("Details", "Brand", new { id = product.BrandId });
             }
+
             await PrepareViewBag(product.BrandId);
             return View(product);
         }
@@ -254,26 +202,26 @@ namespace StepStyle.Web.Controllers
             if (product == null) return NotFound();
 
             int brandId = product.BrandId;
+            var allVariants = await _variantRepository.GetAllAsync();
+            var productVariants = allVariants.Where(v => v.ProductId == id).ToList();
 
-            try
-            {
-                var allVariants = await _variantRepository.GetAllAsync();
-                var productVariants = allVariants.Where(v => v.ProductId == id).ToList();
-
-                foreach (var variant in productVariants)
-                {
-                    await _variantRepository.DeleteAsync(variant.Id);
-                }
-
-                await _productRepository.DeleteAsync(id);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Помилка при видаленні: " + ex.Message);
-                return RedirectToAction("Details", "Brand", new { id = brandId });
-            }
+            foreach (var variant in productVariants) await _variantRepository.DeleteAsync(variant.Id);
+            await _productRepository.DeleteAsync(id);
 
             return RedirectToAction("Details", "Brand", new { id = brandId });
+        }
+
+        private async Task EnsureSizesExist()
+        {
+            var existingSizes = await _sizeRepository.GetAllAsync();
+            if (existingSizes.Count() < 10)
+            {
+                for (int i = 18; i <= 45; i++)
+                {
+                    if (!existingSizes.Any(s => s.Value == i.ToString()))
+                        await _sizeRepository.AddAsync(new Size { Value = i.ToString() });
+                }
+            }
         }
 
         private void CleanProductModelState(Product product)
@@ -283,12 +231,8 @@ namespace StepStyle.Web.Controllers
             ModelState.Remove("Images");
             ModelState.Remove("Reviews");
             ModelState.Remove("SKU");
-
             var keysToRemove = ModelState.Keys.Where(k => k.StartsWith("Variants")).ToList();
-            foreach (var key in keysToRemove)
-            {
-                ModelState.Remove(key);
-            }
+            foreach (var key in keysToRemove) ModelState.Remove(key);
         }
 
         private async Task PrepareViewBag(int brandId)
@@ -312,11 +256,7 @@ namespace StepStyle.Web.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            return new ProductImage
-            {
-                ImageUrl = "/images/products/" + fileName,
-                IsMain = true
-            };
+            return new ProductImage { ImageUrl = "/images/products/" + fileName, IsMain = true };
         }
     }
 }

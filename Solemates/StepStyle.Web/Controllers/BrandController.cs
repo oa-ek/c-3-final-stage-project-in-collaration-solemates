@@ -5,6 +5,7 @@ using StepStyle.Web.Data;
 using StepStyle.Web.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,6 +49,7 @@ namespace StepStyle.Web.Controllers
         public IActionResult Create() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Brand brand)
         {
             if (ModelState.IsValid)
@@ -69,7 +71,10 @@ namespace StepStyle.Web.Controllers
 
             if (brand == null) return NotFound();
 
-            ViewBag.CountryInfo = await _countryService.GetCountryByNameAsync("usa");
+            if (!string.IsNullOrEmpty(brand.Country))
+            {
+                ViewBag.CountryInfo = await _countryService.GetCountryByNameAsync(brand.Country);
+            }
 
             return View(brand);
         }
@@ -98,15 +103,12 @@ namespace StepStyle.Web.Controllers
                     if (existingBrand == null) return NotFound();
 
                     existingBrand.Name = brand.Name;
+                    existingBrand.Country = brand.Country;
 
                     if (logoFile != null && logoFile.Length > 0)
                     {
                         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "brands");
-
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
+                        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
                         string uniqueFileName = $"brand_{existingBrand.Id}.jpg";
                         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -130,11 +132,14 @@ namespace StepStyle.Web.Controllers
             return View(brand);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
-            var brand = await _context.Brands.FindAsync(id);
+            var brand = await _context.Brands
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (brand == null) return NotFound();
 
             return View(brand);
@@ -150,16 +155,24 @@ namespace StepStyle.Web.Controllers
 
             if (brand != null)
             {
-                _context.Brands.Remove(brand);
-                await _context.SaveChangesAsync();
-            }
+                try
+                {
+                    if (brand.Products != null && brand.Products.Any())
+                    {
+                        _context.Products.RemoveRange(brand.Products);
+                    }
 
+                    _context.Brands.Remove(brand);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Не вдалося видалити бренд: " + ex.Message);
+                    return View("Delete", brand);
+                }
+            }
             return RedirectToAction(nameof(Index));
         }
-
-        private bool BrandExists(int id)
-        {
-            return _context.Brands.Any(e => e.Id == id);
-        }
+        private bool BrandExists(int id) => _context.Brands.Any(e => e.Id == id);
     }
 }
