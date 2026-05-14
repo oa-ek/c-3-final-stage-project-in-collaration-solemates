@@ -11,7 +11,6 @@
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-header bg-dark text-white py-3 rounded-top-4">
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-plus-circle-fill fs-4 me-2"></i>
                         <h2 class="h4 m-0 fw-bold">Новий товар: @ViewBag.BrandName</h2>
                     </div>
                 </div>
@@ -23,86 +22,78 @@
                         <input type="hidden" asp-for="BrandId" />
                         <input type="hidden" asp-for="CategoryId" />
 
+                        <input type="hidden" name="mainImageIndex" id="mainImageIndex" value="0" />
+
                         <div class="row g-4">
                             <div class="col-md-7 border-end">
                                 <h5 class="fw-bold mb-3 text-muted small text-uppercase">Основна інформація</h5>
 
                                 <div class="mb-3">
                                     <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
-                                    <input asp-for="Name" class="form-control form-control-lg" required placeholder="Наприклад: Nike Air Force 1 '07" />
+                                    <input asp-for="Name" class="form-control form-control-lg" required placeholder="Наприклад: Nike Air Force 1" />
                                     <span asp-validation-for="Name" class="text-danger small"></span>
                                 </div>
 
                                 <div class="row g-3">
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="SKU" class="form-label fw-bold">Артикул (SKU)</label>
-                                        <input asp-for="SKU" class="form-control" placeholder="CW2288-111" required />
+                                        <input asp-for="SKU" class="form-control" placeholder="CW2288-111" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="Price" class="form-label fw-bold">Ціна (₴)</label>
-                                        <div class="input-group">
-                                            <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
-                                            <span class="input-group-text">₴</span>
-                                        </div>
+                                        <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label asp-for="Gender" class="form-label fw-bold">Категорія статі</label>
+                                    <label asp-for="Gender" class="form-label fw-bold">Категорія</label>
                                     <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label asp-for="Description" class="form-label fw-bold">Опис товару</label>
-                                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="Розкажіть про матеріали..."></textarea>
+                                    <label asp-for="Description" class="form-label fw-bold">Опис</label>
+                                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                                 </div>
                             </div>
 
                             <div class="col-md-5">
-                                <h5 class="fw-bold mb-3 text-muted small text-uppercase">Медіафайли</h5>
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase">Зображення</h5>
 
-                                <div class="card bg-light border-dashed p-4 text-center mb-3">
-                                    <label class="form-label fw-bold d-block mb-3">Головне фото</label>
-                                    <div id="imagePreviewContainer" class="mb-3 d-none">
-                                        <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 250px; object-fit: cover;" />
+                                <div class="card bg-light border-dashed p-4 text-center">
+                                    <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mb-3 justify-content-center">
+                                        <div id="placeholderIcon">
+                                            <i class="bi bi-images display-4 text-muted"></i>
+                                            <p class="small text-muted mt-2">Виберіть фотографії</p>
+                                        </div>
                                     </div>
 
-                                    <div id="placeholderIcon">
-                                        <i class="bi bi-cloud-arrow-up display-4 text-muted mb-2"></i>
-                                    </div>
+                                    <input type="file" name="imageFiles" id="imageInput"
+                                           class="form-control" accept="image/*" multiple required />
 
-                                    <input type="file" name="uploadedImage" id="imageInput" class="form-control" accept="image/*" required />
-                                    <div class="form-text mt-2 small">Рекомендовано: квадратне фото</div>
+                                    <div id="fileCountBadge" class="badge bg-dark mt-2 d-none">Вибрано фото: 0</div>
                                 </div>
 
-                                <div class="alert alert-info small border-0 shadow-sm">
-                                    <i class="bi bi-info-circle-fill me-2"></i>
-                                    Додаткові фото можна буде завантажити пізніше.
+                                <div class="alert alert-dark mt-3 small shadow-sm border-0">
+                                    <i class="bi bi-cursor-fill me-1 text-warning"></i>
+                                    <strong>Порада:</strong> Клікніть на фото, щоб зробити його <b>головним</b>.
                                 </div>
                             </div>
                         </div>
 
                         <hr class="my-5" />
 
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold m-0 text-muted small text-uppercase">Розмірна сітка</h5>
-                        </div>
-
+                        <h5 class="fw-bold mb-4 text-muted small text-uppercase">Розмірна сітка (вкажіть кількість)</h5>
                         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-                            @if (allSizes != null && allSizes.Any())
+                            @if (allSizes != null)
                             {
                                 for (int i = 0; i < allSizes.Count; i++)
                                 {
                                     <div class="col">
                                         <div class="card h-100 border-0 shadow-sm text-center">
-                                            <div class="card-header py-1 bg-light border-bottom-0">
-                                                <div class="fw-bolder fs-5 text-dark">@allSizes[i].Value</div>
-                                            </div>
+                                            <div class="card-header py-1 bg-light fw-bold">@allSizes[i].Value</div>
                                             <div class="card-body p-2">
                                                 <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
-                                                <input type="number" name="Variants[@i].QuantityInStock"
-                                                       class="form-control form-control-sm text-center border-0 bg-light fw-bold"
-                                                       value="0" min="0" />
+                                                <input type="number" name="Variants[@i].QuantityInStock" class="form-control form-control-sm text-center" value="0" min="0" />
                                             </div>
                                         </div>
                                     </div>
@@ -110,9 +101,9 @@
                             }
                         </div>
 
-                        <div class="mt-5 pt-4 border-top d-flex justify-content-between">
+                        <div class="mt-5 d-flex justify-content-between">
                             <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-outline-secondary px-4 rounded-pill">Назад</a>
-                            <button type="submit" class="btn btn-dark btn-lg px-5 rounded-pill shadow-sm fw-bold">Зберегти</button>
+                            <button type="submit" class="btn btn-dark btn-lg px-5 shadow rounded-pill">Створити товар</button>
                         </div>
                     </form>
                 </div>
@@ -123,16 +114,57 @@
 
 @section Scripts {
     <script>
-        document.getElementById('imageInput').onchange = function (evt) {
-            const [file] = this.files;
-            if (file) {
-                const preview = document.getElementById('imagePreview');
-                const container = document.getElementById('imagePreviewContainer');
-                const icon = document.getElementById('placeholderIcon');
+        const imageInput = document.getElementById('imageInput');
+        const container = document.getElementById('imagePreviewContainer');
+        const placeholder = document.getElementById('placeholderIcon');
+        const badge = document.getElementById('fileCountBadge');
+        const mainIdxInput = document.getElementById('mainImageIndex');
 
-                preview.src = URL.createObjectURL(file);
-                container.classList.remove('d-none');
-                icon.classList.add('d-none');
+        imageInput.onchange = function () {
+            const files = this.files;
+            container.innerHTML = '';
+            mainIdxInput.value = "0";
+
+            if (files.length > 0) {
+                badge.innerText = "Вибрано фото: " + files.length;
+                badge.classList.remove('d-none');
+
+                Array.from(files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const wrapper = document.createElement('div');
+                        wrapper.classList.add('preview-wrapper');
+                        wrapper.dataset.index = index;
+
+                        if(index === 0) wrapper.classList.add('is-main');
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('img-thumbnail', 'clickable-preview');
+
+                        const label = document.createElement('span');
+                        label.innerText = (index === 0) ? "Головне" : "Зробити головним";
+                        label.classList.add('main-label');
+
+                        wrapper.onclick = function() {
+                            document.querySelectorAll('.preview-wrapper').forEach(w => {
+                                w.classList.remove('is-main');
+                                w.querySelector('.main-label').innerText = "Зробити головним";
+                            });
+                            wrapper.classList.add('is-main');
+                            label.innerText = "Головне";
+                            mainIdxInput.value = index;
+                        };
+
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(label);
+                        container.appendChild(wrapper);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                container.appendChild(placeholder);
+                badge.classList.add('d-none');
             }
         };
     </script>
@@ -143,8 +175,46 @@
         border: 2px dashed #dee2e6 !important;
     }
 
-    .form-control:focus {
+    .preview-wrapper {
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+        .preview-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+    .clickable-preview {
+        width: 110px;
+        height: 110px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        transition: 0.2s;
+    }
+
+    .is-main .clickable-preview {
         border-color: #212529;
-        box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.1);
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .main-label {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        right: 5px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-size: 9px;
+        padding: 2px 4px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: bold;
+        pointer-events: none;
+    }
+
+    .is-main .main-label {
+        background: #212529;
     }
 </style>

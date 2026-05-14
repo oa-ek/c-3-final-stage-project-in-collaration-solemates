@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Редагувати товар";
     var allSizes = ViewBag.FullSizesList as List<StepStyle.Web.Models.Size>;
-    var firstImage = Model.Images?.FirstOrDefault(i => i.IsMain) ?? Model.Images?.FirstOrDefault();
 }
 
 <div class="container my-5">
@@ -11,118 +10,98 @@
         <div class="col-lg-10">
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-header bg-dark text-white py-3 rounded-top-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-pencil-square fs-4 me-2 text-warning"></i>
-                            <h2 class="h4 m-0 fw-bold">Редагування: @Model.Name</h2>
-                        </div>
-                        <span class="badge bg-outline-light border opacity-75">ID: #@Model.Id</span>
+                    <div class="d-flex align-items-center">
+                        <h2 class="h4 m-0 fw-bold">Редагування: @Model.Name</h2>
                     </div>
                 </div>
 
                 <div class="card-body p-4">
                     <form asp-action="Edit" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="BrandId" />
                         <input type="hidden" asp-for="CategoryId" />
 
+                        <input type="hidden" name="mainImageIndex" id="mainImageIndex" value="-1" />
+                        <input type="hidden" name="ExistingMainImageId" id="ExistingMainImageId" value="@Model.Images?.FirstOrDefault(i => i.IsMain)?.Id" />
+
                         <div class="row g-4">
                             <div class="col-md-7 border-end">
-                                <h5 class="fw-bold mb-3 text-muted small text-uppercase letter-spacing-1">Характеристики товару</h5>
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase">Основна інформація</h5>
 
                                 <div class="mb-3">
                                     <label asp-for="Name" class="form-label fw-bold">Назва моделі</label>
-                                    <input asp-for="Name" class="form-control" required />
+                                    <input asp-for="Name" class="form-control form-control-lg" required />
                                     <span asp-validation-for="Name" class="text-danger small"></span>
                                 </div>
 
                                 <div class="row g-3">
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="SKU" class="form-label fw-bold">Артикул (SKU)</label>
-                                        <input asp-for="SKU" class="form-control bg-light" placeholder="Наприклад: 555088-105" />
+                                        <input asp-for="SKU" class="form-control" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="Price" class="form-label fw-bold">Ціна (₴)</label>
-                                        <div class="input-group">
-                                            <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
-                                            <span class="input-group-text bg-white">₴</span>
-                                        </div>
+                                        <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
                                     </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="Gender" class="form-label fw-bold">Стать</label>
-                                    <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
                                 </div>
 
                                 <div class="mb-3">
                                     <label asp-for="Description" class="form-label fw-bold">Опис</label>
-                                    <textarea asp-for="Description" class="form-control" rows="5">@Model.Description</textarea>
+                                    <textarea asp-for="Description" class="form-control" rows="5"></textarea>
                                 </div>
                             </div>
 
                             <div class="col-md-5">
-                                <h5 class="fw-bold mb-3 text-muted small text-uppercase letter-spacing-1">Зображення</h5>
+                                <h5 class="fw-bold mb-3 text-muted small text-uppercase">Керування фото</h5>
 
-                                <div class="card bg-light border-0 p-3 text-center mb-3 rounded-4">
-                                    <label class="form-label fw-bold d-block mb-3 small">Поточне головне фото</label>
+                                <p class="text-muted small mb-2">
+                                    <i class="bi bi-info-circle me-1"></i> Клікніть на фото, щоб зробити <b>головним</b>.
+                                </p>
 
-                                    <div class="position-relative d-inline-block mb-3">
-                                        @if (firstImage != null)
+                                <div class="d-flex flex-wrap gap-3 p-3 bg-light rounded-3 border mb-4" id="existingImagesContainer">
+                                    @if (Model.Images != null && Model.Images.Any())
+                                    {
+                                        foreach (var img in Model.Images)
                                         {
-                                            <img src="@firstImage.ImageUrl" class="img-thumbnail shadow-sm rounded-3" style="width: 200px; height: 200px; object-fit: cover;" />
-                                            <input type="hidden" name="ExistingImageId" value="@firstImage.Id" />
-                                            <input type="hidden" name="ExistingImageUrl" value="@firstImage.ImageUrl" />
-                                        }
-                                        else
-                                        {
-                                            <div class="bg-white rounded-3 d-flex align-items-center justify-content-center border" style="width: 200px; height: 200px;">
-                                                <i class="bi bi-image text-muted opacity-25" style="font-size: 3rem;"></i>
+                                            <div class="position-relative existing-img-wrapper @(img.IsMain ? "is-main" : "")" data-id="@img.Id">
+                                                <img src="@img.ImageUrl" class="img-thumbnail shadow-sm" onclick="setExistingMain(@img.Id)" />
+                                                <div class="main-badge">Головне</div>
+                                                <div class="delete-overlay" title="Видалити">
+                                                    <input type="checkbox" name="ImagesToDelete" value="@img.Id" class="form-check-input" />
+                                                </div>
                                             </div>
                                         }
-                                    </div>
-
-                                    <div class="mt-2 text-start">
-                                        <label class="form-label small fw-bold">Замінити фото:</label>
-                                        <input type="file" name="uploadedImage" class="form-control form-control-sm" accept="image/*" />
-                                    </div>
+                                    }
                                 </div>
 
-                                <div class="alert alert-warning border-0 small shadow-sm">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                    Зверніть увагу: завантаження нового фото видалить старе головне зображення.
+                                <div class="upload-zone p-4 text-center border-dashed rounded-3 bg-white">
+                                    <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mb-3 justify-content-center">
+                                        <i class="bi bi-cloud-arrow-up display-6 text-muted"></i>
+                                    </div>
+                                    <label for="imageInput" class="btn btn-sm btn-dark px-3 rounded-pill">Додати нові фото</label>
+                                    <input type="file" name="uploadedImages" id="imageInput" class="d-none" accept="image/*" multiple />
                                 </div>
                             </div>
                         </div>
 
                         <hr class="my-5" />
 
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="fw-bold m-0 text-muted small text-uppercase letter-spacing-1">Складський облік (Розміри)</h5>
-                            <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">Наявність у парах</span>
-                        </div>
-
+                        <h5 class="fw-bold mb-4 text-muted small text-uppercase">Розмірна сітка</h5>
                         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
                             @if (allSizes != null)
                             {
                                 for (int i = 0; i < allSizes.Count; i++)
                                 {
-                                    var currentVariant = Model.Variants?.FirstOrDefault(v => v.SizeId == allSizes[i].Id);
-                                    var quantity = currentVariant?.QuantityInStock ?? 0;
-
+                                    var variant = Model.Variants?.FirstOrDefault(v => v.SizeId == allSizes[i].Id);
                                     <div class="col">
                                         <div class="card h-100 border-0 shadow-sm text-center">
-                                            <div class="card-header py-1 bg-light border-bottom-0">
-                                                <div class="fw-bolder fs-5 text-dark">@allSizes[i].Value</div>
-                                            </div>
+                                            <div class="card-header py-1 bg-light fw-bold">@allSizes[i].Value</div>
                                             <div class="card-body p-2">
                                                 <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
                                                 <input type="number" name="Variants[@i].QuantityInStock"
-                                                       class="form-control form-control-sm text-center border-0 bg-light fw-bold"
-                                                       value="@quantity" min="0" />
+                                                       class="form-control form-control-sm text-center"
+                                                       value="@(variant?.QuantityInStock ?? 0)" min="0" />
                                             </div>
                                         </div>
                                     </div>
@@ -130,13 +109,9 @@
                             }
                         </div>
 
-                        <div class="mt-5 pt-4 border-top d-flex justify-content-between">
-                            <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-outline-secondary px-4 rounded-pill">
-                                Скасувати
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow fw-bold">
-                                <i class="bi bi-save me-2"></i> Оновити товар
-                            </button>
+                        <div class="mt-5 d-flex justify-content-between">
+                            <a asp-controller="Brand" asp-action="Details" asp-route-id="@Model.BrandId" class="btn btn-outline-secondary px-4 rounded-pill">Скасувати</a>
+                            <button type="submit" class="btn btn-dark btn-lg px-5 shadow rounded-pill">Зберегти зміни</button>
                         </div>
                     </form>
                 </div>
@@ -145,17 +120,123 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        function setExistingMain(id) {
+            document.querySelectorAll('.existing-img-wrapper').forEach(el => el.classList.remove('is-main'));
+            document.querySelector(`.existing-img-wrapper[data-id="${id}"]`).classList.add('is-main');
+            document.getElementById('ExistingMainImageId').value = id;
+            document.getElementById('mainImageIndex').value = "-1";
+
+            document.querySelectorAll('.preview-wrapper').forEach(w => w.classList.remove('is-main'));
+        }
+
+        const imageInput = document.getElementById('imageInput');
+        const container = document.getElementById('imagePreviewContainer');
+
+        imageInput.onchange = function () {
+            container.innerHTML = '';
+            if (this.files.length > 0) {
+                Array.from(this.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'preview-wrapper position-relative';
+                        wrapper.innerHTML = `
+                            <img src="${e.target.result}" class="img-thumbnail" style="width:80px;height:80px;object-fit:cover;">
+                            <div class="main-label">Нове</div>
+                        `;
+
+                        wrapper.onclick = function() {
+                            document.querySelectorAll('.existing-img-wrapper').forEach(el => el.classList.remove('is-main'));
+                            document.querySelectorAll('.preview-wrapper').forEach(el => el.classList.remove('is-main'));
+
+                            wrapper.classList.add('is-main');
+                            document.getElementById('mainImageIndex').value = index;
+                            document.getElementById('ExistingMainImageId').value = "";
+                        };
+                        container.appendChild(wrapper);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        };
+    </script>
+}
+
 <style>
-    .letter-spacing-1 {
-        letter-spacing: 1px;
+    .border-dashed {
+        border: 2px dashed #dee2e6 !important;
     }
 
-    .form-control:focus {
-        border-color: #212529;
-        box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.1);
+    .existing-img-wrapper, .preview-wrapper {
+        width: 80px;
+        height: 80px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        position: relative;
     }
 
-    .img-thumbnail {
-        border: 2px solid #fff;
+        .existing-img-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .existing-img-wrapper img, .preview-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+
+        .existing-img-wrapper.is-main img, .preview-wrapper.is-main img {
+            border-color: #212529;
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+        }
+
+    .main-badge, .main-label {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #212529;
+        color: #fff;
+        font-size: 9px;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        display: none;
+        padding: 2px 0;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        pointer-events: none;
     }
+
+    .is-main .main-badge, .is-main .main-label {
+        display: block;
+    }
+
+    .delete-overlay {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: white;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dc3545;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        z-index: 10;
+    }
+
+        .delete-overlay input[type="checkbox"] {
+            cursor: pointer;
+            margin: 0;
+            width: 14px;
+            height: 14px;
+            accent-color: #dc3545;
+        }
 </style>

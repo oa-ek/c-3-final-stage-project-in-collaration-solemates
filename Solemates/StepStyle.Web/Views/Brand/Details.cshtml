@@ -32,16 +32,16 @@
                 }
                 else if (!string.IsNullOrEmpty(Model.Country))
                 {
-                    <span class="badge border border-light rounded-pill px-3 py-2 small">
-                        <i class="bi bi-geo-alt me-1"></i> @Model.Country
+                    <span class="badge bg-light text-dark rounded-pill px-3 py-2 small shadow-sm fw-bold">
+                        @Model.Country
                     </span>
                 }
             </div>
 
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb justify-content-center mb-0">
-                    <li class="breadcrumb-item"><a asp-action="Index" class="text-white-50 text-decoration-none small">Каталог брендів</a></li>
-                    <li class="breadcrumb-item active text-white small" aria-current="page">@Model.Name</li>
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-white-50 text-decoration-none small fw-bold text-uppercase">Каталог брендів</a></li>
+                    <li class="breadcrumb-item active text-white small fw-bold text-uppercase" aria-current="page">@Model.Name</li>
                 </ol>
             </nav>
         </div>
@@ -50,15 +50,15 @@
 
 <div class="container px-4 px-lg-5">
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <h2 class="fw-bold m-0">Колекція бренду</h2>
+        <h2 class="fw-bold m-0 text-uppercase">Колекція бренду</h2>
         @if (User.IsInRole("Admin"))
         {
             <div class="d-flex gap-2">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-dark btn-sm rounded-pill px-4">
-                    <i class="bi bi-pencil me-1"></i> Редагувати бренд
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold shadow-sm text-dark text-uppercase">
+                    Редагувати бренд
                 </a>
-                <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-sm rounded-pill px-4 shadow-sm">
-                    <i class="bi bi-plus-lg me-1"></i> Додати нову пару
+                <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-sm rounded-pill px-4 shadow-sm fw-bold text-uppercase">
+                    Додати нову пару
                 </a>
             </div>
         }
@@ -86,30 +86,30 @@
                                     </div>
                                 }
                             </a>
-                            <span class="badge bg-dark position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill shadow-sm">@product.Gender</span>
+                            <span class="badge bg-dark position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill shadow-sm fw-bold text-uppercase">@product.Gender</span>
                         </div>
 
                         <div class="card-body p-4 text-center">
-                            <div class="small text-muted mb-1">Арт: @product.SKU</div>
+                            <div class="small text-muted mb-1 fw-bold text-uppercase">Арт: @product.SKU</div>
                             <h5 class="fw-bolder mb-2">@product.Name</h5>
                             <div class="fs-5 fw-bold text-dark">@product.Price ₴</div>
                         </div>
 
                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
                             <div class="d-grid gap-2">
-                                <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="btn btn-outline-dark rounded-pill shadow-sm btn-sm fw-bold">
+                                <a asp-controller="@detailsController" asp-action="Details" asp-route-id="@product.Id" class="btn btn-dark rounded-pill shadow-sm btn-sm fw-bold text-uppercase">
                                     Детальніше
                                 </a>
 
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <div class="d-flex gap-2">
-                                        <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning btn-sm flex-grow-1 rounded-pill">
+                                        <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning btn-sm flex-grow-1 rounded-pill shadow-sm">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <form asp-controller="Product" asp-action="Delete" asp-route-id="@product.Id" method="post" class="flex-grow-1">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-danger btn-sm w-100 rounded-pill" onclick="return confirm('Видалити @product.Name?');">
+                                            <button type="submit" class="btn btn-danger btn-sm w-100 rounded-pill shadow-sm" onclick="return confirm('Видалити @product.Name?');">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -125,14 +125,18 @@
     else
     {
         <div class="text-center py-5 bg-light rounded-4 border border-dashed">
-            <i class="bi bi-emoji-neutral text-muted" style="font-size: 3rem;"></i>
-            <h3 class="text-muted mt-3">У цього бренду ще немає товарів</h3>
-            <p class="text-secondary">Будьте першим, хто додасть круту пару взуття!</p>
+            <i class="bi bi-archive text-muted opacity-25" style="font-size: 3rem;"></i>
+
+            <h3 class="text-muted mt-3 fw-bold text-uppercase">У цього бренду ще немає товарів</h3>
+            <p class="text-secondary small fw-bold text-uppercase">Нові моделі з'являться найближчим часом.</p>
 
             @if (User.IsInRole("Admin"))
             {
-                <a asp-controller="Product" asp-action="Create" asp-route-brandId="@Model.Id" class="btn btn-dark btn-lg rounded-pill px-5 shadow-sm mt-3">
-                    <i class="bi bi-plus-lg me-2"></i> Додати першу пару
+                <a asp-controller="Product"
+                   asp-action="Create"
+                   asp-route-brandId="@Model.Id"
+                   class="btn btn-dark btn-lg rounded-pill px-5 shadow-sm mt-3 fw-bold text-uppercase">
+                    Додати першу пару
                 </a>
             }
         </div>
@@ -156,5 +160,10 @@
     .border-dashed {
         border-style: dashed !important;
         border-width: 2px !important;
+    }
+
+    .text-uppercase {
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px;
     }
 </style>
