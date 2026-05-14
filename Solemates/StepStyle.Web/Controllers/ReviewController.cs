@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace StepStyle.Web.Controllers
 {
-    [Authorize] 
+    [Authorize]
     public class ReviewController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -32,7 +32,7 @@ namespace StepStyle.Web.Controllers
                 UserId = user.Id,
                 Rating = Rating,
                 Text = Text,
-                DatePosted = DateTime.UtcNow 
+                DatePosted = DateTime.UtcNow
             };
 
             _context.Reviews.Add(review);
@@ -43,21 +43,34 @@ namespace StepStyle.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")] 
-        public async Task<IActionResult> Reply(int ReviewId, string ReplyText)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReplyToReview(int ReviewId, string ReplyText)
         {
             var review = await _context.Reviews.FindAsync(ReviewId);
 
-            if (review != null)
+            if (review != null && !string.IsNullOrWhiteSpace(ReplyText))
             {
                 var userText = review.Text.Split("|ADMIN_REPLY|")[0].Trim();
-
                 review.Text = $"{userText} |ADMIN_REPLY| {ReplyText}";
 
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Відповідь магазину збережена!";
             }
 
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review != null)
+            {
+                _context.Reviews.Remove(review);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Відгук видалено.";
+            }
             return Redirect(Request.Headers["Referer"].ToString());
         }
     }
