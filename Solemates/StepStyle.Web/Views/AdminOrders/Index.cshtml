@@ -1,0 +1,49 @@
+﻿@model IEnumerable<StepStyle.Web.Models.Order>
+
+@{
+    ViewData["Title"] = "Управління замовленнями";
+}
+
+<div class="container mt-4">
+    <h2>Управління замовленнями</h2>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <table class="table table-striped table-hover mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>№</th>
+                <th>Дата</th>
+                <th>Email клієнта</th>
+                <th>Сума</th>
+                <th>Статус замовлення</th>
+                <th>Оплата</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td><strong>@order.Id</strong></td>
+                    <td>@order.OrderDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@(order.User?.Email ?? "Невідомий користувач")</td>
+                    <td>@order.TotalAmount.ToString("C")</td>
+                    <td>
+                        <span class="badge bg-secondary">@order.Status</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">@order.PaymentStatus</span>
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-primary">Деталі</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

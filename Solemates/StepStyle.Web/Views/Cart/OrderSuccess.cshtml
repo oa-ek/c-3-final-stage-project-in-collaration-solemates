@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Замовлення успішне";
+}
+
+<div class="container mt-5 text-center">
+    <div class="alert alert-success mt-4">
+        <h2>🎉 Дякуємо за замовлення!</h2>
+        <p class="lead">Ваше замовлення <strong>№@ViewBag.OrderId</strong> успішно оформлено і вже передано в обробку.</p>
+    </div>
+    
+    <div class="mt-4">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Повернутися на головну</a>
+    </div>
+</div>

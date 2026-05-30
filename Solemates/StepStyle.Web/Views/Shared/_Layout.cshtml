@@ -28,6 +28,32 @@
                         <li class="nav-item">
                             <a class="nav-link active fw-semibold" asp-area="" asp-controller="Brand" asp-action="Index">Каталог</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" asp-area="" asp-controller="Contact" asp-action="Index">Контакти</a>
+                        </li>
+                        
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-primary" asp-area="" asp-controller="Contact" asp-action="MyMessages">
+                                    <i class="bi bi-chat-left-text me-1"></i>Мої запити
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-danger" asp-area="" asp-controller="AdminOrders" asp-action="Index">
+                                    <i class="bi bi-shield-lock me-1"></i>Замовлення
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-danger" asp-area="" asp-controller="AdminMessages" asp-action="Index">
+                                    <i class="bi bi-envelope-paper me-1"></i>Запити
+                                </a>
+                            </li>
+                        }
                     </ul>
 
                     <partial name="_LoginPartial" />

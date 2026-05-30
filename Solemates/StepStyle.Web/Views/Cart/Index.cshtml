@@ -1,121 +1,101 @@
 ﻿@model StepStyle.Web.Models.Cart
 
 @{
-    ViewData["Title"] = "Мій кошик";
+    ViewData["Title"] = "Кошик";
 }
 
-<header class="bg-dark py-4 mb-5 shadow-sm">
-    <div class="container px-4 px-lg-5 my-2 text-center">
-        <h1 class="display-6 fw-bolder text-white text-uppercase m-0">Ваш кошик</h1>
-        <p class="lead fw-normal text-white-50 mb-0">Перевірте ваші обрані моделі перед покупкою</p>
-    </div>
-</header>
-
-<div class="container px-4 px-lg-5">
-    @if (Model != null && Model.CartItems != null && Model.CartItems.Any())
-    {
-        <div class="row gx-lg-5">
-            <div class="col-lg-8">
-                <h4 class="mb-4 fw-bold text-uppercase small text-muted">Товари в замовленні</h4>
-
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h5 class="text-uppercase mb-4 fw-bold text-secondary" style="letter-spacing: 1px;">Товари в замовленні</h5>
+            
+            @if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
+            {
+                <div class="alert alert-info py-4 text-center shadow-sm rounded-3">
+                    <h5 class="mb-2">Тут поки що порожньо 🛍️</h5>
+                    <p class="text-muted mb-3">Додайте товари з каталогу, щоб почати оформлення замовлення.</p>
+                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-dark px-4 rounded-pill">Перейти до каталогу</a>
+                </div>
+            }
+            else
+            {
                 @foreach (var item in Model.CartItems)
                 {
-                    <div class="card mb-3 border-0 shadow-sm overflow-hidden cart-item-card">
-                        <div class="card-body p-0">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-3 col-md-2">
-                                    <img src="@(item.ProductVariant?.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "/images/no-image.png")"
-                                         class="img-fluid"
-                                         alt="product"
-                                         style="height: 100px; width: 100%; object-fit: cover;">
-                                </div>
+                    var product = item.ProductVariant?.Product;
+                    var size = item.ProductVariant?.Size;
+                    var imageUrl = product?.Images?.FirstOrDefault()?.ImageUrl ?? "/images/no-image.png";
 
-                                <div class="col-6 col-md-5 ps-3">
-                                    <h6 class="fw-bold mb-1 text-dark text-truncate">@item.ProductVariant?.Product?.Name</h6>
-                                    <div class="small text-muted mb-1">Розмір: <span class="fw-bold text-dark">@item.ProductVariant?.Size?.Value</span></div>
-                                    <div class="small text-muted">Арт: @item.ProductVariant?.Product?.SKU</div>
+                    <div class="card mb-3 border-0 shadow-sm rounded-3 overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <img src="@imageUrl" alt="@product?.Name" class="img-fluid rounded-3" style="max-height: 80px; object-fit: contain;" />
                                 </div>
-
-                                <div class="col-3 col-md-5 pe-3 text-end">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-6 text-md-center">
-                                            <span class="badge bg-light text-dark border px-3 py-2">@item.Quantity шт.</span>
-                                        </div>
-                                        <div class="col-md-6 mt-2 mt-md-0">
-                                            <div class="fw-bold text-dark fs-6">
-                                                @((item.ProductVariant?.Product?.Price ?? 0) * item.Quantity) ₴
-                                            </div>
-                                            <form asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="mt-1">
-                                                <input type="hidden" name="cartItemId" value="@item.Id" />
-                                                <button type="submit" class="btn btn-link text-danger p-0 small text-decoration-none" title="Видалити">
-                                                    Видалити
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                <div class="col-md-5">
+                                    <h6 class="fw-bold mb-1">@product?.Name</h6>
+                                    <p class="text-muted small mb-1">Розмір: <strong class="text-dark">@size?.Value</strong></p>
+                                    <p class="text-muted small mb-0">Ціна: @product?.Price.ToString("F1") ₴</p>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-3">@item.Quantity шт.</span>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <div class="fw-bold mb-2">@((product?.Price * item.Quantity)?.ToString("F1")) ₴</div>
+                                    <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                                        <input type="hidden" name="cartItemId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-link text-danger text-decoration-none p-0 small">Видалити</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
-            </div>
+            }
+        </div>
 
-            <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="card shadow border-0 p-4 bg-white sticky-top" style="top: 20px; border-radius: 15px;">
-                    <h5 class="fw-bold mb-4">Деталі замовлення</h5>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 rounded-4" style="background-color: #fff;">
+                <h4 class="fw-bold mb-4">Деталі замовлення</h4>
+                
+                @{
+                    var totalItems = Model?.CartItems?.Sum(i => i.Quantity) ?? 0;
+                    var totalPrice = Model?.CartItems?.Sum(i => (i.ProductVariant?.Product?.Price ?? 0) * i.Quantity) ?? 0;
+                }
 
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Товарів:</span>
-                        <span class="fw-bold">@Model.CartItems.Sum(x => x.Quantity)</span>
-                    </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Товарів:</span>
+                    <span class="fw-bold">@totalItems</span>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Доставка:</span>
+                    <span class="text-success fw-bold text-uppercase small">Безкоштовно</span>
+                </div>
+                
+                <hr class="my-3" style="border-top: 1px dashed #dee2e6;" />
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fw-bold fs-5">Разом:</span>
+                    <span class="fw-bold fs-4 text-dark">@totalPrice.ToString("F1") ₴</span>
+                </div>
 
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Доставка:</span>
-                        <span class="text-success fw-bold small text-uppercase">Безкоштовно</span>
-                    </div>
-
-                    <hr class="my-3">
-
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold fs-5">Разом:</span>
-                        <span class="fw-bold fs-4 text-dark">
-                            @Model.CartItems.Sum(x => (x.ProductVariant?.Product?.Price ?? 0) * x.Quantity) ₴
-                        </span>
-                    </div>
-
-                    <a asp-controller="Order" asp-action="Checkout" class="btn btn-dark btn-lg w-100 rounded-pill fw-bold shadow-sm mb-3">
+                @if (totalItems > 0)
+                {
+                    <a asp-controller="Cart" asp-action="Checkout" class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-2 shadow-sm text-center text-white text-decoration-none d-block" style="background-color: #1a1e21;">
                         Оформити замовлення
                     </a>
+                }
+                else
+                {
+                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold mb-2 disabled">
+                        Кошик порожній
+                    </button>
+                }
 
-                    <a href="/" class="btn btn-outline-secondary btn-sm w-100 rounded-pill text-decoration-none py-2">
-                        <i class="bi bi-arrow-left me-2"></i> Продовжити покупки
-                    </a>
-                </div>
+                <a asp-controller="Catalog" asp-action="Index" class="btn btn-outline-secondary w-100 py-3 rounded-pill fw-bold btn-sm text-center text-decoration-none d-block">
+                    ← Продовжити покупки
+                </a>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="text-center py-5">
-            <div class="mb-4">
-                <i class="bi bi-bag-x text-muted opacity-25" style="font-size: 6rem;"></i>
-            </div>
-            <h2 class="fw-bold">Ваш кошик ще порожній</h2>
-            <p class="text-muted mb-4">Ми впевнені, що у нас є пара взуття, яка чекає саме на вас!</p>
-            <a href="/" class="btn btn-dark btn-lg px-5 rounded-pill shadow">
-                Переглянути каталог
-            </a>
-        </div>
-    }
+    </div>
 </div>
-
-<style>
-    .cart-item-card {
-        transition: all 0.2s ease;
-    }
-
-        .cart-item-card:hover {
-            transform: scale(1.01);
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08) !important;
-        }
-</style>
