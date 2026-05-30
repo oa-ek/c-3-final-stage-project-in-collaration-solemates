@@ -1,0 +1,57 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Налаштування профілю";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h3 class="h4 fw-bold text-uppercase letter-spacing-2 mb-4">@ViewData["Title"]</h3>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="row">
+    <div class="col-md-12">
+        <form id="profile-form" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Username" class="form-control border-0 border-bottom rounded-0 shadow-none bg-light opacity-75" placeholder="Username" disabled />
+                <label asp-for="Username" class="form-label">Логін (Email)</label>
+            </div>
+
+            <div class="form-floating mb-4">
+                <input asp-for="Input.PhoneNumber" class="form-control border-0 border-bottom rounded-0 shadow-none bg-light" placeholder="Номер телефону" />
+                <label asp-for="Input.PhoneNumber" class="form-label">Номер телефону</label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+            </div>
+
+            <button id="update-profile-button" type="submit" class="btn btn-dark btn-lg px-5 py-3 rounded-pill fw-bold shadow-sm text-uppercase letter-spacing-1">
+                Зберегти зміни
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    .letter-spacing-1 {
+        letter-spacing: 1px;
+    }
+
+    .letter-spacing-2 {
+        letter-spacing: 2px;
+    }
+
+    .form-control:focus {
+        background-color: #fcfcfc !important;
+        border-color: #000 !important;
+        box-shadow: none !important;
+    }
+
+    .form-floating > label {
+        opacity: 0.7;
+    }
+</style>

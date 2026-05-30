@@ -20,3 +20,46 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+.btn-primary,
+input[type="submit"].btn-primary,
+button[type="submit"].btn-primary {
+    background-color: #212529 !important;
+    border-color: #212529 !important;
+    color: #ffffff !important;
+    border-radius: 50px !important; 
+    font-weight: bold !important;
+    text-uppercase: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 12px 35px !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background-color: #000000 !important;
+        border-color: #000000 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+
+.form-control {
+    border: none !important;
+    border-bottom: 1px solid #ced4da !important;
+    border-radius: 0 !important;
+    background-color: #f8f9fa !important;
+    padding: 10px 12px !important;
+    transition: border-color 0.2s ease !important;
+}
+
+    .form-control:focus {
+        background-color: #ffffff !important;
+        border-color: #000000 !important;
+        box-shadow: none !important; 
+    }
+    .form-control:disabled {
+        background-color: #e9ecef !important;
+        opacity: 0.75;
+    }

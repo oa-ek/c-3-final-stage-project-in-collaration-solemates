@@ -20,7 +20,6 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <input type="hidden" asp-for="BrandId" />
-                        <input type="hidden" asp-for="CategoryId" />
 
                         <input type="hidden" name="mainImageIndex" id="mainImageIndex" value="0" />
 
@@ -46,8 +45,17 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label asp-for="Gender" class="form-label fw-bold">Категорія</label>
+                                    <label asp-for="Gender" class="form-label fw-bold">Для кого (Гендер)</label>
                                     <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()"></select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="CategoryId" class="form-label fw-bold">Категорія взуття</label>
+                                    <select asp-for="CategoryId" class="form-select"
+                                            asp-items="@(new SelectList(ViewBag.CategoriesList, "Id", "Name"))" required>
+                                        <option value=""> Оберіть категорію </option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
                                 </div>
 
                                 <div class="mb-3">
@@ -70,7 +78,7 @@
                                     <input type="file" name="imageFiles" id="imageInput"
                                            class="form-control" accept="image/*" multiple required />
 
-                                    <div id="fileCountBadge" class="badge bg-dark mt-2 d-none">Вибрано фото: 0</div>
+                                    <div id="fileCountBadge" class="badge bg-dark mt-2 d-none">Вибрано photo: 0</div>
                                 </div>
 
                                 <div class="alert alert-dark mt-3 small shadow-sm border-0">
@@ -211,6 +219,7 @@
         border-radius: 5px;
         text-transform: uppercase;
         font-weight: bold;
+        text-align: center;
         pointer-events: none;
     }
 

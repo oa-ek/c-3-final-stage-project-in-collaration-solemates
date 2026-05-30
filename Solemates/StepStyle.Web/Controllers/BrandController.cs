@@ -34,8 +34,10 @@ namespace StepStyle.Web.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index(double? minSize, double? maxSize)
+        public async Task<IActionResult> Index(string? gender, double? minSize, double? maxSize, int? categoryId, decimal? minPrice, decimal? maxPrice)
         {
+            ViewBag.CategoriesList = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+
             var brandsQuery = _context.Brands
                 .Include(b => b.Products!)
                     .ThenInclude(p => p.Images)
@@ -44,25 +46,41 @@ namespace StepStyle.Web.Controllers
                         .ThenInclude(v => v.Size);
 
             var brands = await brandsQuery.ToListAsync();
-            if (minSize.HasValue || maxSize.HasValue)
+
+            if (!string.IsNullOrEmpty(gender) || minSize.HasValue || maxSize.HasValue || categoryId.HasValue || minPrice.HasValue || maxPrice.HasValue)
             {
                 foreach (var brand in brands)
                 {
                     if (brand.Products != null)
                     {
-                        brand.Products = brand.Products.Where(p => p.Variants != null && p.Variants.Any(v =>
-                            v.QuantityInStock > 0 &&
-                            v.Size != null && !string.IsNullOrEmpty(v.Size.Value) && 
-                            double.TryParse(v.Size.Value, out double exactSize) &&
-                            (!minSize.HasValue || exactSize >= minSize.Value) &&
-                            (!maxSize.HasValue || exactSize <= maxSize.Value)
-                        )).ToList();
+                        brand.Products = brand.Products.Where(p =>
+                            (string.IsNullOrEmpty(gender) || p.Gender.ToString().Equals(gender, StringComparison.OrdinalIgnoreCase))
+                            &&
+                            (!categoryId.HasValue || p.CategoryId == categoryId.Value)
+                            &&
+                            (!minPrice.HasValue || p.Price >= minPrice.Value)
+                            &&
+                            (!maxPrice.HasValue || p.Price <= maxPrice.Value)
+                            &&
+                            (!minSize.HasValue && !maxSize.HasValue || (p.Variants != null && p.Variants.Any(v =>
+                                v.QuantityInStock > 0 &&
+                                v.Size != null && !string.IsNullOrEmpty(v.Size.Value) &&
+                                double.TryParse(v.Size.Value.Replace(',', '.'), out double exactSize) &&
+                                (!minSize.HasValue || exactSize >= minSize.Value) &&
+                                (!maxSize.HasValue || exactSize <= maxSize.Value)
+                            )))
+                        ).ToList();
                     }
                 }
             }
 
+            ViewBag.SelectedGender = gender;
             ViewBag.MinSize = minSize;
             ViewBag.MaxSize = maxSize;
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+
             ViewBag.ExchangeRates = await _exchangeRateService.GetExchangeRatesAsync();
 
             return View(brands);
@@ -195,6 +213,7 @@ namespace StepStyle.Web.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
         private bool BrandExists(int id) => _context.Brands.Any(e => e.Id == id);
     }
 }
