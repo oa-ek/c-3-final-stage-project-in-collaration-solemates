@@ -82,8 +82,9 @@ namespace StepStyle.Web.Controllers
         {
             var brand = await _brandRepository.GetByIdAsync(brandId);
             if (brand == null) return NotFound();
-
             await EnsureSizesExist();
+            await EnsureCategoriesExist();
+
             var categories = await _categoryRepository.GetAllAsync();
 
             var product = new Product
@@ -152,7 +153,7 @@ namespace StepStyle.Web.Controllers
 
             var allVariants = await _variantRepository.GetAllAsync();
             product.Variants = allVariants.Where(v => v.ProductId == id).ToList();
-
+            await EnsureCategoriesExist();
             await PrepareViewBag(product.BrandId);
             return View(product);
         }
@@ -282,12 +283,33 @@ namespace StepStyle.Web.Controllers
             }
         }
 
+        private async Task EnsureCategoriesExist()
+        {
+            var existingCategories = await _categoryRepository.GetAllAsync();
+            var defaultCategories = new List<string>
+            {
+                "Кросівки", "Кеди", "Туфлі", "Черевики", "Чоботи",
+                "Босоніжки", "Сандалі", "Шльопанці", "Лофери",
+                "Мокасини", "Балетки", "Капці"
+            };
+
+            foreach (var categoryName in defaultCategories)
+            {
+                if (!existingCategories.Any(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    await _categoryRepository.AddAsync(new Category { Name = categoryName });
+                }
+            }
+        }
+
         private void CleanProductModelState(Product product)
         {
             ModelState.Remove("Brand");
             ModelState.Remove("Category");
             ModelState.Remove("Images");
             ModelState.Remove("Reviews");
+            ModelState.Remove("Gender");
+            ModelState.Remove("Description");
             if (string.IsNullOrEmpty(product.SKU)) ModelState.Remove("SKU");
 
             var keysToRemove = ModelState.Keys.Where(k => k.StartsWith("Variants")).ToList();
@@ -298,10 +320,14 @@ namespace StepStyle.Web.Controllers
         {
             var brand = await _brandRepository.GetByIdAsync(brandId);
             ViewBag.BrandName = brand?.Name;
+
             var sizes = await _sizeRepository.GetAllAsync();
             ViewBag.FullSizesList = sizes.OrderBy(s => {
                 return double.TryParse(s.Value.Replace(',', '.'), out double res) ? res : 0;
             }).ToList();
+
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.CategoriesList = categories.OrderBy(c => c.Name).ToList();
         }
 
         private async Task<ProductImage> SaveImage(IFormFile file)

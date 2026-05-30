@@ -18,9 +18,10 @@
                 <div class="card-body p-4">
                     <form asp-action="Edit" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="BrandId" />
-                        <input type="hidden" asp-for="CategoryId" />
 
                         <input type="hidden" name="mainImageIndex" id="mainImageIndex" value="-1" />
                         <input type="hidden" name="ExistingMainImageId" id="ExistingMainImageId" value="@Model.Images?.FirstOrDefault(i => i.IsMain)?.Id" />
@@ -35,6 +36,21 @@
                                     <span asp-validation-for="Name" class="text-danger small"></span>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label asp-for="Gender" class="form-label fw-bold">Для кого (Гендер)</label>
+                                    <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<StepStyle.Web.Models.Gender>()" required></select>
+                                    <span asp-validation-for="Gender" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="CategoryId" class="form-label fw-bold">Категорія взуття</label>
+                                    <select asp-for="CategoryId" class="form-select"
+                                            asp-items="@(new SelectList(ViewBag.CategoriesList, "Id", "Name"))" required>
+                                        <option value="">-- Оберіть категорію --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                </div>
+
                                 <div class="row g-3">
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="SKU" class="form-label fw-bold">Артикул (SKU)</label>
@@ -43,6 +59,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="Price" class="form-label fw-bold">Ціна (₴)</label>
                                         <input asp-for="Price" type="number" step="0.01" class="form-control fw-bold" required />
+                                        <span asp-validation-for="Price" class="text-danger small"></span>
                                     </div>
                                 </div>
 
@@ -98,6 +115,11 @@
                                         <div class="card h-100 border-0 shadow-sm text-center">
                                             <div class="card-header py-1 bg-light fw-bold">@allSizes[i].Value</div>
                                             <div class="card-body p-2">
+                                                @if (variant != null)
+                                                {
+                                                    <input type="hidden" name="Variants[@i].Id" value="@variant.Id" />
+                                                    <input type="hidden" name="Variants[@i].ProductId" value="@variant.ProductId" />
+                                                }
                                                 <input type="hidden" name="Variants[@i].SizeId" value="@allSizes[i].Id" />
                                                 <input type="number" name="Variants[@i].QuantityInStock"
                                                        class="form-control form-control-sm text-center"
