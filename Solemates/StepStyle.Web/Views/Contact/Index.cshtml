@@ -4,51 +4,120 @@
     ViewData["Title"] = "Зворотний зв'язок";
 }
 
+<style>
+    .contact-card {
+        background-color: #ffffff;
+        border: 1px solid #e5e5e5 !important;
+    }
+
+    .contact-title {
+        letter-spacing: -1px;
+    }
+
+    .form-label-custom {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control-custom {
+        background-color: #ffffff !important;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.95rem !important;
+        color: #212529 !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+        .form-control-custom:focus {
+            border-color: #212529 !important;
+            box-shadow: 0 0 0 1px #212529 !important;
+            outline: none;
+        }
+
+        .form-control-custom::placeholder {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+    .btn-submit-custom {
+        background-color: #212529;
+        color: #ffffff;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-submit-custom:hover {
+            background-color: #495057;
+            color: #ffffff;
+        }
+
+    .success-box-custom {
+        border: 1px solid #212529 !important;
+        background-color: #fbfbfb;
+        color: #212529;
+        font-size: 0.95rem;
+    }
+</style>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-5">
-                    <h2 class="text-center fw-bold mb-4">Напишіть нам</h2>
-                    <p class="text-center text-muted mb-4">Маєте питання щодо доставки, розмірів чи наявності товару? Заповніть форму нижче, і наша команда з радістю вам допоможе!</p>
+        <div class="col-md-8 col-lg-7">
+            <div class="card contact-card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <h2 class="text-center fw-bold mb-3 contact-title text-dark">Напишіть нам</h2>
+                    <p class="text-center text-muted small mx-auto mb-4" style="max-width: 480px;">
+                        Маєте питання щодо міжнародної доставки, підбору розміру чи наявності моделі? Заповніть форму, і ми зв'яжемося з вами найближчим часом.
+                    </p>
 
                     @if (TempData["SuccessMessage"] != null)
                     {
-                        <div class="alert alert-success text-center fw-medium rounded-3 py-3">
-                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <div class="success-box-custom text-center fw-medium rounded-3 py-3 px-4 mb-4 d-flex align-items-center justify-content-center shadow-sm">
+                            <i class="bi bi-check2-black me-2 fs-5"></i>
+                            <span>@TempData["SuccessMessage"]</span>
                         </div>
                     }
 
-                    <form asp-action="Index" method="post">
+                    <form asp-action="Index" method="post" autocomplete="off">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label asp-for="Name" class="form-label fw-semibold">Ваше ім'я</label>
-                                <input asp-for="Name" class="form-control form-control-lg bg-light" placeholder="Іван Іванов" />
-                                <span asp-validation-for="Name" class="text-danger small"></span>
+                                <label asp-for="Name" class="form-label-custom">Ваше ім'я</label>
+                                <input asp-for="Name" class="form-control form-control-custom" placeholder="Іван Іванов" />
+                                <span asp-validation-for="Name" class="text-danger small" style="font-size: 0.8rem;"></span>
                             </div>
                             <div class="col-md-6 mt-3 mt-md-0">
-                                <label asp-for="Email" class="form-label fw-semibold">Ваш Email</label>
-                                <input asp-for="Email" class="form-control form-control-lg bg-light" placeholder="email@example.com" />
-                                <span asp-validation-for="Email" class="text-danger small"></span>
+                                <label asp-for="Email" class="form-label-custom">Ваш Email</label>
+                                <input asp-for="Email" class="form-control form-control-custom" placeholder="email@@example.com" />
+                                <span asp-validation-for="Email" class="text-danger small" style="font-size: 0.8rem;"></span>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Subject" class="form-label fw-semibold">Тема (необов'язково)</label>
-                            <input asp-for="Subject" class="form-control form-control-lg bg-light" placeholder="Наприклад: Доставка в Польщу" />
-                            <span asp-validation-for="Subject" class="text-danger small"></span>
+                            <label asp-for="Subject" class="form-label-custom">Тема запиту</label>
+                            <input asp-for="Subject" class="form-control form-control-custom" placeholder="Наприклад: Доставка в іншу країну" />
+                            <span asp-validation-for="Subject" class="text-danger small" style="font-size: 0.8rem;"></span>
                         </div>
 
                         <div class="mb-4">
-                            <label asp-for="Message" class="form-label fw-semibold">Повідомлення</label>
-                            <textarea asp-for="Message" class="form-control form-control-lg bg-light" rows="5" placeholder="Напишіть ваше запитання тут..."></textarea>
-                            <span asp-validation-for="Message" class="text-danger small"></span>
+                            <label asp-for="Message" class="form-label-custom">Повідомлення</label>
+                            <textarea asp-for="Message" class="form-control form-control-custom" rows="5" placeholder="Опишіть ваше запитання детальніше..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger small" style="font-size: 0.8rem;"></span>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-dark btn-lg rounded-pill fw-bold">Надіслати повідомлення</button>
+                            <button type="submit" class="btn btn-submit-custom btn-lg rounded-pill fw-semibold py-3 border-0 shadow-sm">
+                                Надіслати запит
+                            </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@
     var currentGender = ViewBag.SelectedGender as string;
     var currentCategoryId = ViewBag.SelectedCategoryId as int?;
 
-    // Додаємо перевірку мін/макс ціни для коректної підсвітки активного фільтра
+
     bool isFilterApplied = !string.IsNullOrEmpty(currentGender) ||
                            ViewBag.MinSize != null ||
                            ViewBag.MaxSize != null ||
@@ -123,7 +123,7 @@
                         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
                              data-bs-toggle="collapse" data-bs-target="#collapseGender" style="cursor: pointer;">
                             <h5 class="m-0 text-uppercase small fw-bold tracking-wide">
-                                <i class="bi bi-gender-ambiguous me-2"></i>Для кого (Гендер)
+                                </i>Для кого (Гендер)
                             </h5>
                             <i class="bi bi-chevron-down text-white-50"></i>
                         </div>
@@ -154,7 +154,7 @@
                         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
                              data-bs-toggle="collapse" data-bs-target="#collapseCategory" style="cursor: pointer;">
                             <h5 class="m-0 text-uppercase small fw-bold tracking-wide">
-                                <i class="bi bi-grid-3x3-gap-fill me-2"></i>Тип взуття
+                                </i>Тип взуття
                             </h5>
                             <i class="bi bi-chevron-down text-white-50"></i>
                         </div>
@@ -185,7 +185,7 @@
                         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
                              data-bs-toggle="collapse" data-bs-target="#collapseSizes" style="cursor: pointer;">
                             <h5 class="m-0 text-uppercase small fw-bold tracking-wide">
-                                <i class="bi bi-ruler me-2"></i>Розмір взуття (EU)
+                                </i>Розмір взуття (EU)
                             </h5>
                             <i class="bi bi-chevron-down text-white-50"></i>
                         </div>
@@ -214,7 +214,7 @@
                         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center"
                              data-bs-toggle="collapse" data-bs-target="#collapsePrice" style="cursor: pointer;">
                             <h5 class="m-0 text-uppercase small fw-bold tracking-wide">
-                                <i class="bi bi-cash-stack me-2"></i>Ціна (₴)
+                                </i>Ціна (₴)
                             </h5>
                             <i class="bi bi-chevron-down text-white-50"></i>
                         </div>
@@ -241,7 +241,7 @@
                     <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-3">
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-dark rounded-pill fw-bold text-uppercase btn-sm py-2 shadow-sm">
-                                <i class="bi bi-sliders me-1"></i> Застосувати фільтри
+                                </i> Застосувати фільтри
                             </button>
 
                             @if (isFilterApplied)

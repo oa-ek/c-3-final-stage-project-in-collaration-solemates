@@ -4,17 +4,107 @@
     ViewData["Title"] = "Кошик";
 }
 
-<div class="container mt-5">
+<style>
+    .cart-card-item {
+        background-color: #ffffff;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 12px !important;
+        transition: border-color 0.2s ease;
+    }
+
+        .cart-card-item:hover {
+            border-color: #212529 !important;
+        }
+
+    .checkout-summary-card {
+        background-color: #ffffff;
+        border: 1px solid #212529 !important; 
+        border-radius: 12px !important;
+        padding: 1.75rem !important;
+    }
+
+    .qty-display {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #212529;
+        background-color: #fafafa;
+        border: 1px solid #e5e5e5;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    .btn-remove-item {
+        color: #8c8c8c !important;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+        .btn-remove-item:hover {
+            color: #dc3545 !important;
+            text-decoration: underline !important;
+        }
+
+    .btn-stepstyle-black {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-stepstyle-black:hover {
+            background-color: #495057 !important;
+            color: #ffffff !important;
+        }
+
+    .btn-stepstyle-outline {
+        color: #212529 !important;
+        border: 1px solid #212529 !important;
+        background-color: transparent !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-stepstyle-outline:hover {
+            background-color: #212529 !important;
+            color: #ffffff !important;
+        }
+
+    .alert-empty-cart {
+        border: 1px solid #e5e5e5;
+        background-color: #fafafa;
+        color: #212529;
+    }
+</style>
+
+<div class="container mt-5" style="max-width: 1200px;">
+
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark" style="letter-spacing: -0.5px;">Ваш кошик</h2>
+        <p class="text-muted small mb-0">Перевірте обрані позиції перед оформленням безпечної доставки.</p>
+    </div>
+    <hr class="text-muted opacity-20 mb-4" />
+
     <div class="row">
-        <div class="col-lg-8">
-            <h5 class="text-uppercase mb-4 fw-bold text-secondary" style="letter-spacing: 1px;">Товари в замовленні</h5>
-            
+        <div class="col-lg-8 mb-4">
+            <h5 class="text-uppercase mb-4 fw-bold text-dark" style="letter-spacing: 0.5px; font-size: 0.8rem;">Товари в замовленні</h5>
+
             @if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
             {
-                <div class="alert alert-info py-4 text-center shadow-sm rounded-3">
-                    <h5 class="mb-2">Тут поки що порожньо 🛍️</h5>
-                    <p class="text-muted mb-3">Додайте товари з каталогу, щоб почати оформлення замовлення.</p>
-                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-dark px-4 rounded-pill">Перейти до каталогу</a>
+                <div class="alert alert-empty-cart py-5 text-center rounded-3 shadow-sm">
+                    <i class="bi bi-bag-x d-block fs-1 mb-3 text-muted opacity-60"></i>
+                    <h5 class="fw-bold mb-2">Тут поки що порожньо</h5>
+                    <p class="text-muted small mb-4">Додайте товари з нашого каталогу, щоб почати оформлення.</p>
+                    <a asp-controller="Catalog" asp-action="Index" class="btn btn-stepstyle-black px-4 rounded-pill py-2">
+                        Перейти до каталогу
+                    </a>
                 </div>
             }
             else
@@ -25,25 +115,32 @@
                     var size = item.ProductVariant?.Size;
                     var imageUrl = product?.Images?.FirstOrDefault()?.ImageUrl ?? "/images/no-image.png";
 
-                    <div class="card mb-3 border-0 shadow-sm rounded-3 overflow-hidden">
+                    <div class="card cart-card-item mb-3 border-0 shadow-sm overflow-hidden">
                         <div class="card-body p-3">
                             <div class="row align-items-center">
-                                <div class="col-md-2 text-center">
-                                    <img src="@imageUrl" alt="@product?.Name" class="img-fluid rounded-3" style="max-height: 80px; object-fit: contain;" />
+                                <div class="col-md-2 text-center mb-3 mb-md-0">
+                                    <img src="@imageUrl" alt="@product?.Name" class="img-fluid rounded-3" style="max-height: 90px; object-fit: contain;" />
                                 </div>
-                                <div class="col-md-5">
-                                    <h6 class="fw-bold mb-1">@product?.Name</h6>
-                                    <p class="text-muted small mb-1">Розмір: <strong class="text-dark">@size?.Value</strong></p>
-                                    <p class="text-muted small mb-0">Ціна: @product?.Price.ToString("F1") ₴</p>
+
+                                <div class="col-md-5 mb-2 mb-md-0">
+                                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">@product?.Name</h6>
+                                    <p class="text-muted small mb-1">Розмір: <span class="badge bg-light text-dark border px-2 fw-bold">@size?.Value</span></p>
+                                    <p class="text-muted small mb-0">Ціна за пару: @product?.Price.ToString("C")</p>
                                 </div>
-                                <div class="col-md-2 text-center">
-                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-3">@item.Quantity шт.</span>
+
+                                <div class="col-md-2 text-center mb-2 mb-md-0">
+                                    <span class="qty-display">@item.Quantity шт.</span>
                                 </div>
+
                                 <div class="col-md-3 text-end">
-                                    <div class="fw-bold mb-2">@((product?.Price * item.Quantity)?.ToString("F1")) ₴</div>
-                                    <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                                    <div class="fw-bold text-dark mb-2" style="font-size: 1.05rem;">
+                                        @((product?.Price * item.Quantity)?.ToString("C"))
+                                    </div>
+                                    <form asp-action="RemoveFromCart" method="post" class="d-inline m-0">
                                         <input type="hidden" name="cartItemId" value="@item.Id" />
-                                        <button type="submit" class="btn btn-link text-danger text-decoration-none p-0 small">Видалити</button>
+                                        <button type="submit" class="btn btn-link btn-remove-item text-decoration-none p-0 border-0 bg-transparent">
+                                            <i class="bi bi-trash3 small me-1"></i> Видалити
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -54,46 +151,48 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm p-4 rounded-4" style="background-color: #fff;">
-                <h4 class="fw-bold mb-4">Деталі замовлення</h4>
-                
+            <h5 class="text-uppercase mb-4 fw-bold text-dark" style="letter-spacing: 0.5px; font-size: 0.8rem;">Підсумок</h5>
+
+            <div class="card checkout-summary-card border-0 shadow-sm">
+                <h4 class="fw-bold text-dark mb-4" style="font-size: 1.2rem; letter-spacing: -0.3px;">Деталі замовлення</h4>
+
                 @{
                     var totalItems = Model?.CartItems?.Sum(i => i.Quantity) ?? 0;
                     var totalPrice = Model?.CartItems?.Sum(i => (i.ProductVariant?.Product?.Price ?? 0) * i.Quantity) ?? 0;
                 }
 
-                <div class="d-flex justify-content-between mb-3">
-                    <span class="text-muted">Товарів:</span>
-                    <span class="fw-bold">@totalItems</span>
+                <div class="d-flex justify-content-between mb-3" style="font-size: 0.95rem;">
+                    <span class="text-muted">Усього товарів:</span>
+                    <span class="fw-semibold text-dark">@totalItems шт.</span>
                 </div>
-                
-                <div class="d-flex justify-content-between mb-3">
+
+                <div class="d-flex justify-content-between mb-3" style="font-size: 0.95rem;">
                     <span class="text-muted">Доставка:</span>
-                    <span class="text-success fw-bold text-uppercase small">Безкоштовно</span>
+                    <span class="text-dark fw-bold text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Безкоштовно</span>
                 </div>
-                
+
                 <hr class="my-3" style="border-top: 1px dashed #dee2e6;" />
-                
+
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <span class="fw-bold fs-5">Разом:</span>
-                    <span class="fw-bold fs-4 text-dark">@totalPrice.ToString("F1") ₴</span>
+                    <span class="fw-bold text-dark" style="font-size: 1.1rem;">Разом до сплати:</span>
+                    <span class="fw-bold text-dark" style="font-size: 1.4rem; letter-spacing: -0.5px;">@totalPrice.ToString("C")</span>
                 </div>
 
                 @if (totalItems > 0)
                 {
-                    <a asp-controller="Cart" asp-action="Checkout" class="btn btn-dark w-100 py-3 rounded-pill fw-bold mb-2 shadow-sm text-center text-white text-decoration-none d-block" style="background-color: #1a1e21;">
-                        Оформити замовлення
+                    <a asp-controller="Cart" asp-action="Checkout" class="btn btn-stepstyle-black w-100 py-3 rounded-pill text-center text-decoration-none d-block mb-3">
+                        Оформити замовлення <i class="bi bi-arrow-right ms-1 small"></i>
                     </a>
                 }
                 else
                 {
-                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold mb-2 disabled">
+                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold mb-3 disabled" style="background-color: #e5e5e5; color: #a1a1a1; border: 0;">
                         Кошик порожній
                     </button>
                 }
 
-                <a asp-controller="Catalog" asp-action="Index" class="btn btn-outline-secondary w-100 py-3 rounded-pill fw-bold btn-sm text-center text-decoration-none d-block">
-                    ← Продовжити покупки
+                <a asp-controller="Catalog" asp-action="Index" class="btn btn-stepstyle-outline w-100 py-2-5 rounded-pill text-center text-decoration-none d-block" style="padding: 0.65rem 0;">
+                    Продовжити покупки
                 </a>
             </div>
         </div>
