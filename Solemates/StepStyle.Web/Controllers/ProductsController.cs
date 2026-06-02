@@ -238,7 +238,7 @@ namespace StepStyle.Web.Controllers
                 existingProduct.CategoryId = product.CategoryId;
 
                 await _productRepository.UpdateAsync(existingProduct);
-                return RedirectToAction("Details", "Brand", new { id = existingProduct.BrandId });
+                return RedirectToAction("Details", "Catalog", new { id = existingProduct.Id });
             }
 
             await PrepareViewBag(product.BrandId);

@@ -30,10 +30,11 @@
                 <strong>Панель адміністратора:</strong> Модерація товару увімкнена.
             </div>
             <div class="d-flex gap-2">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm px-4 rounded-pill fw-bold shadow-sm border-0 text-dark">
+                <a asp-controller="Product" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm px-4 rounded-pill fw-bold shadow-sm border-0 text-dark">
                     Редагувати
                 </a>
-                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Видалити цей товар назавжди?');">
+
+                <form asp-controller="Product" asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Видалити цей товар назавжди?');">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-danger btn-sm px-4 rounded-pill fw-bold shadow-sm border-0">
                         Видалити
@@ -122,7 +123,7 @@
                         {
                             @foreach (var variant in Model.Variants.Where(v => v.QuantityInStock > 0).OrderBy(v => v.Size.Value))
                             {
-                                <button class="btn btn-light px-3 py-2 fw-bold rounded-3 size-selector shadow-sm">
+                                <button type="button" class="btn btn-light px-3 py-2 fw-bold rounded-3 size-selector shadow-sm" data-variant-id="@variant.Id">
                                     @variant.Size?.Value
                                 </button>
                             }
@@ -141,11 +142,18 @@
                     <p class="text-secondary lh-lg" style="white-space: pre-line; font-size: 0.95rem;">@Model.Description</p>
                 </div>
 
-                <div class="d-grid gap-2 pt-2">
-                    <button class="btn btn-dark btn-lg py-3 rounded-4 fw-bold shadow-sm btn-cart-main text-uppercase"
-                            @(Model.Variants?.Any(v => v.QuantityInStock > 0) == true ? "" : "disabled")>
-                        Додати в кошик
-                    </button>
+                <div class="pt-2">
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post" id="addToCartForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productVariantId" id="selectedVariantId" value="" required />
+                        <input type="hidden" name="quantity" value="1" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="btnAddToCartSubmit" class="btn btn-dark btn-lg py-3 rounded-4 fw-bold shadow-sm btn-cart-main text-uppercase" disabled>
+                                Оберіть розмір
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -287,6 +295,25 @@
                 element.classList.add('active-thumb');
             }, 150);
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const sizeButtons = document.querySelectorAll(".size-selector");
+            const hiddenInput = document.getElementById("selectedVariantId");
+            const btnAddToCart = document.getElementById("btnAddToCartSubmit");
+
+            sizeButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    sizeButtons.forEach(btn => btn.classList.remove("active"));
+                    this.classList.add("active");
+
+                    const variantId = this.getAttribute("data-variant-id");
+                    hiddenInput.value = variantId;
+
+                    btnAddToCart.removeAttribute("disabled");
+                    btnAddToCart.innerText = "Додати в кошик";
+                });
+            });
+        });
     </script>
 }
 
@@ -309,8 +336,8 @@
         }
 
         .size-selector:focus, .size-selector.active {
-            background-color: #212529;
-            color: white;
+            background-color: #212529 !important;
+            color: white !important;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 

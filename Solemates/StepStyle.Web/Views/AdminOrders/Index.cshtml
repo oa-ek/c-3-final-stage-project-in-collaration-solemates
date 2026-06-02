@@ -14,10 +14,8 @@
 
     var paymentStatusesUk = new Dictionary<string, string>
     {
-        { "Pending", "Очікує" },
         { "Unpaid", "Неоплачено" },
         { "Paid", "Оплачено" },
-        { "Failed", "Помилка" },
         { "Refunded", "Повернено" }
     };
 }
@@ -99,6 +97,53 @@
             background-color: #495057 !important;
         }
 
+    .filter-select {
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 0.75rem !important;
+        background-color: #ffffff;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    select.filter-select {
+        padding-right: 1.8rem !important;
+        cursor: pointer;
+    }
+
+    .filter-select:focus {
+        border-color: #212529 !important;
+        box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.15) !important;
+        outline: 0;
+    }
+
+    .btn-filter-apply {
+        background-color: #212529 !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1rem !important;
+        font-weight: 500;
+    }
+
+        .btn-filter-apply:hover {
+            background-color: #495057 !important;
+        }
+
+    .btn-filter-reset {
+        background-color: #f8f9fa !important;
+        color: #495057 !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1rem !important;
+    }
+
+        .btn-filter-reset:hover {
+            background-color: #e2e6ea !important;
+            color: #212529 !important;
+        }
+
     .admin-toast-success {
         border: 1px solid #212529;
         background-color: #fbfbfb;
@@ -120,6 +165,74 @@
             <i class="bi bi-check2-circle fs-5 me-2"></i> @TempData["SuccessMessage"]
         </div>
     }
+
+    <div class="card p-3 mb-4 table-container shadow-sm border-0">
+        <form method="get" class="row g-3 align-items-end">
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <label for="searchIdFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-hash me-1"></i> № замовлення
+                </label>
+                <input type="text" id="searchIdFilter" name="searchId" class="form-control filter-select" placeholder="Напр. 5" value="@ViewBag.CurrentSearchId" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label for="paymentStatusFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-credit-card me-1"></i> Статус оплати
+                </label>
+                <select id="paymentStatusFilter" name="paymentStatus" class="form-select filter-select">
+                    <option value="">Всі статуси оплати</option>
+                    @foreach (var status in paymentStatusesUk)
+                    {
+                        if (ViewBag.CurrentPaymentStatus == status.Key)
+                        {
+                            <option value="@status.Key" selected="selected">@status.Value</option>
+                        }
+                        else
+                        {
+                            <option value="@status.Key">@status.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label for="orderStatusFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-truck me-1"></i> Статус замовлення
+                </label>
+                <select id="orderStatusFilter" name="orderStatus" class="form-select filter-select">
+                    <option value="">Всі статуси замовлення</option>
+                    @foreach (var status in orderStatusesUk)
+                    {
+                        if (ViewBag.CurrentOrderStatus == status.Key)
+                        {
+                            <option value="@status.Key" selected="selected">@status.Value</option>
+                        }
+                        else
+                        {
+                            <option value="@status.Key">@status.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <label for="orderDateFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-calendar3 me-1"></i> Дата
+                </label>
+                <input type="date" id="orderDateFilter" name="orderDate" class="form-control filter-select" value="@ViewBag.CurrentOrderDate" />
+            </div>
+
+            <div class="col-12 col-lg-2 d-flex gap-2 justify-content-end">
+                <button type="submit" class="btn btn-filter-apply shadow-sm border-0 d-flex align-items-center w-100 justify-content-center">
+                    <i class="bi bi-funnel me-1"></i> Знайти
+                </button>
+                <a asp-action="Index" class="btn btn-filter-reset d-flex align-items-center justify-content-center">
+                    Скинути
+                </a>
+            </div>
+        </form>
+    </div>
 
     <div class="card table-container shadow-sm overflow-hidden mb-5">
         <div class="table-responsive">
@@ -177,9 +290,18 @@
                             </td>
                         </tr>
                     }
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-search fs-2 d-block mb-2 text-muted opacity-50"></i>
+                                Замовлень за вказаними критеріями пошуку не знайдено.
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
-
 </div>

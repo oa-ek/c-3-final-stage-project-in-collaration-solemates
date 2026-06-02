@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StepStyle.Web.Data;
 using StepStyle.Web.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,12 +19,57 @@ namespace StepStyle.Web.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? paymentStatus, string? orderStatus, DateTime? orderDate, string? searchId)
         {
-            var orders = await _context.Orders
+            var ordersQuery = _context.Orders
                 .Include(o => o.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchId))
+            {
+                if (int.TryParse(searchId.Trim().Replace("#", ""), out int parsedId))
+                {
+                    ordersQuery = ordersQuery.Where(o => o.Id == parsedId);
+                }
+                else
+                {
+                    ordersQuery = ordersQuery.Where(o => false);
+                }
+            }
+            else
+            {
+
+                if (!string.IsNullOrEmpty(paymentStatus))
+                {
+                    if (Enum.TryParse(typeof(PaymentStatus), paymentStatus, out var parsedPayment))
+                    {
+                        ordersQuery = ordersQuery.Where(o => o.PaymentStatus == (PaymentStatus)parsedPayment);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(orderStatus))
+                {
+                    if (Enum.TryParse(typeof(OrderStatus), orderStatus, out var parsedOrder))
+                    {
+                        ordersQuery = ordersQuery.Where(o => o.Status == (OrderStatus)parsedOrder);
+                    }
+                }
+
+                if (orderDate.HasValue)
+                {
+                    var targetDate = orderDate.Value.Date;
+                    ordersQuery = ordersQuery.Where(o => o.OrderDate >= targetDate && o.OrderDate < targetDate.AddDays(1));
+                }
+            }
+
+            var orders = await ordersQuery
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
+
+            ViewBag.CurrentPaymentStatus = paymentStatus;
+            ViewBag.CurrentOrderStatus = orderStatus;
+            ViewBag.CurrentOrderDate = orderDate?.ToString("yyyy-MM-dd");
+            ViewBag.CurrentSearchId = searchId; 
 
             return View(orders);
         }
@@ -52,19 +98,47 @@ namespace StepStyle.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, OrderStatus status, PaymentStatus paymentStatus)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.ProductVariant)
+                .FirstOrDefaultAsync(o => o.Id == id);
 
             if (order == null)
             {
                 return NotFound();
             }
 
+            if (status == OrderStatus.Cancelled && order.Status != OrderStatus.Cancelled)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    if (item.ProductVariant != null)
+                    {
+                        item.ProductVariant.QuantityInStock += item.Quantity;
+                    }
+                }
+                TempData["SuccessMessage"] = "Замовлення скасовано, товари повернуто на склад!";
+            }
+            else if (order.Status == OrderStatus.Cancelled && status != OrderStatus.Cancelled)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    if (item.ProductVariant != null)
+                    {
+                        item.ProductVariant.QuantityInStock -= item.Quantity;
+                    }
+                }
+                TempData["SuccessMessage"] = "Замовлення відновлено, товари знову зарезервовані на складі.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Статуси замовлення успішно оновлено!";
+            }
+
             order.Status = status;
             order.PaymentStatus = paymentStatus;
 
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Статуси замовлення успішно оновлено!";
 
             return RedirectToAction(nameof(Details), new { id = order.Id });
         }

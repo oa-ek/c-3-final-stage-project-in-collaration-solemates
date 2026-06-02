@@ -102,6 +102,49 @@
         color: #212529;
     }
 
+    .filter-select {
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 2rem 0.45rem 1rem !important;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        .filter-select:focus {
+            border-color: #212529 !important;
+            box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.15) !important;
+            outline: 0;
+        }
+
+    .btn-filter-apply {
+        background-color: #212529 !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1.2rem !important;
+        font-weight: 500;
+    }
+
+        .btn-filter-apply:hover {
+            background-color: #495057 !important;
+        }
+
+    .btn-filter-reset {
+        background-color: #f8f9fa !important;
+        color: #495057 !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1.2rem !important;
+    }
+
+        .btn-filter-reset:hover {
+            background-color: #e2e6ea !important;
+            color: #212529 !important;
+        }
+
     .admin-toast-success {
         border: 1px solid #212529;
         background-color: #fbfbfb;
@@ -123,6 +166,68 @@
             <i class="bi bi-check2-circle fs-5 me-2"></i> @TempData["SuccessMessage"]
         </div>
     }
+
+    <div class="card p-3 mb-4 table-container shadow-sm border-0">
+        <form method="get" class="row g-3 align-items-end">
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label for="isReadFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-envelope-open me-1"></i> Показувати лише:
+                </label>
+                <select id="isReadFilter" name="isRead" class="form-select filter-select">
+                    <option value="">Всі повідомлення</option>
+                    @if (ViewBag.CurrentIsRead != null && ViewBag.CurrentIsRead == false)
+                    {
+                        <option value="false" selected="selected">Непрочитані</option>
+                        <option value="true">Прочитані</option>
+                    }
+                    else if (ViewBag.CurrentIsRead != null && ViewBag.CurrentIsRead == true)
+                    {
+                        <option value="false">Непрочитані</option>
+                        <option value="true" selected="selected">Прочитані</option>
+                    }
+                    else
+                    {
+                        <option value="false">Непрочитані</option>
+                        <option value="true">Прочитані</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label for="hasReplyFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-chat-left-dots me-1"></i> Надання відповіді
+                </label>
+                <select id="hasReplyFilter" name="hasReply" class="form-select filter-select">
+                    <option value="">Всі запити</option>
+                    @if (ViewBag.CurrentHasReply != null && ViewBag.CurrentHasReply == false)
+                    {
+                        <option value="false" selected="selected">Без відповіді</option>
+                        <option value="true">З відповіддю</option>
+                    }
+                    else if (ViewBag.CurrentHasReply != null && ViewBag.CurrentHasReply == true)
+                    {
+                        <option value="false">Без відповіді</option>
+                        <option value="true" selected="selected">З відповіддю</option>
+                    }
+                    else
+                    {
+                        <option value="false">Без відповіді</option>
+                        <option value="true">З відповіддю</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-md-auto d-flex gap-2 ms-md-auto">
+                <button type="submit" class="btn btn-filter-apply shadow-sm border-0 d-flex align-items-center">
+                    <i class="bi bi-funnel me-1"></i> Застосувати
+                </button>
+                <a asp-action="Index" class="btn btn-filter-reset d-flex align-items-center">
+                    Скинути
+                </a>
+            </div>
+        </form>
+    </div>
 
     <div class="card table-container shadow-sm overflow-hidden mb-5">
         <div class="table-responsive">
@@ -198,7 +303,7 @@
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-chat-left-dots fs-2 d-block mb-2 text-muted opacity-50"></i>
-                                Скринька зворотного зв'язку порожня.
+                                Не знайдено повідомлень за вказаними фільтрами або скринька порожня.
                             </td>
                         </tr>
                     }
