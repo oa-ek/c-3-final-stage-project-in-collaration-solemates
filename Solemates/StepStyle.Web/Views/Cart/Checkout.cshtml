@@ -4,43 +4,114 @@
     ViewData["Title"] = "Оформлення замовлення";
 }
 
-<div class="container mt-5">
-    <h2>Оформлення замовлення</h2>
-    <hr />
+<style>
+    .checkout-card {
+        background-color: #ffffff;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 12px !important;
+        padding: 2rem !important;
+    }
 
-    <div class="row">
-        <div class="col-md-6">
-            <form asp-action="Checkout" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .form-control-custom {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.95rem !important;
+        color: #212529 !important;
+    }
 
-                <div class="form-group mb-3">
-                    <label asp-for="ShippingAddress" class="control-label">Адреса доставки</label>
-                    <input asp-for="ShippingAddress" class="form-control" placeholder="Місто, відділення Нової Пошти..." required />
-                    <span asp-validation-for="ShippingAddress" class="text-danger"></span>
-                </div>
+        .form-control-custom:focus {
+            border-color: #212529 !important;
+            box-shadow: 0 0 0 1px #212529 !important;
+            background-color: #ffffff;
+        }
 
-                <div class="form-group mb-3">
-                    <label asp-for="DeliveryMethod" class="control-label">Спосіб доставки</label>
-                    <select asp-for="DeliveryMethod" class="form-control">
+    .btn-stepstyle-black {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-stepstyle-black:hover {
+            background-color: #495057 !important;
+            color: #ffffff !important;
+        }
+
+    .btn-stepstyle-outline {
+        color: #212529 !important;
+        border: 1px solid #dee2e6 !important;
+        background-color: transparent !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-stepstyle-outline:hover {
+            background-color: #f8f9fa !important;
+            border-color: #212529 !important;
+            color: #212529 !important;
+        }
+</style>
+
+<div class="container mt-5" style="max-width: 750px;">
+
+    <div class="mb-4 text-center text-md-start">
+        <h2 class="fw-bold text-dark" style="letter-spacing: -0.5px;">Оформлення замовлення</h2>
+        <p class="text-muted small mb-0">Будь ласка, вкажіть актуальні дані для доставки та виберіть зручний спосіб оплати.</p>
+    </div>
+    <hr class="text-muted opacity-20 mb-4" />
+
+    <div class="card checkout-card shadow-sm mb-5">
+        <form asp-action="Checkout" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-4">
+                <label asp-for="ShippingAddress" class="small text-uppercase fw-bold text-muted mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-geo-alt me-1"></i> Адреса доставки
+                </label>
+                <input asp-for="ShippingAddress" class="form-control form-control-custom" placeholder="Місто, номер або адреса відділення Нової Пошти..." required />
+                <span asp-validation-for="ShippingAddress" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-4">
+                    <label asp-for="DeliveryMethod" class="small text-uppercase fw-bold text-muted mb-2" style="letter-spacing: 0.5px;">
+                        <i class="bi bi-truck me-1"></i> Спосіб доставки
+                    </label>
+                    <select asp-for="DeliveryMethod" class="form-select form-control-custom">
                         <option value="Нова Пошта">Нова Пошта</option>
                         <option value="Укрпошта">Укрпошта</option>
-                        <option value="Самовивіз">Самовивіз</option>
+                        <option value="Самовивіз">Самовивіз з магазину</option>
                     </select>
+                    <span asp-validation-for="DeliveryMethod" class="text-danger small mt-1 d-block"></span>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="PaymentMethod" class="control-label">Спосіб оплати</label>
-                    <select asp-for="PaymentMethod" class="form-control">
-                        <option value="При отриманні">Оплата при отриманні</option>
-                        <option value="Карткою">Карткою на сайті</option>
+                <div class="col-md-6 form-group mb-4">
+                    <label asp-for="PaymentMethod" class="small text-uppercase fw-bold text-muted mb-2" style="letter-spacing: 0.5px;">
+                        <i class="bi bi-credit-card me-1"></i> Спосіб оплати
+                    </label>
+                    <select asp-for="PaymentMethod" class="form-select form-control-custom">
+                        <option value="При отриманні">Оплата при отриманні (Накладений платіж)</option>
+                        <option value="Карткою">Карткою онлайн</option>
                     </select>
+                    <span asp-validation-for="PaymentMethod" class="text-danger small mt-1 d-block"></span>
                 </div>
+            </div>
 
-                <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-success btn-lg">Підтвердити замовлення</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg ms-2">Повернутися до кошика</a>
-                </div>
-            </form>
-        </div>
+            <div class="pt-2 border-top border-light mt-2 d-flex flex-column-reverse flex-md-row justify-content-between align-items-center gap-3">
+                <a asp-action="Index" class="btn btn-stepstyle-outline rounded-pill px-4 py-2-5 w-100 w-md-auto" style="padding: 0.7rem 1.5rem;">
+                    Повернутися до кошика
+                </a>
+                <button type="submit" class="btn btn-stepstyle-black rounded-pill px-5 py-2-5 w-100 w-md-auto shadow-sm" style="padding: 0.7rem 2rem;">
+                    Підтвердити замовлення <i class="bi bi-check-circle ms-1 small"></i>
+                </button>
+            </div>
+        </form>
     </div>
 </div>

@@ -4,83 +4,311 @@
     ViewData["Title"] = "Запити від клієнтів";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Запити від клієнтів (Зворотний зв'язок)</h2>
-    <hr />
+<style>
+    .table-container {
+        background-color: #ffffff;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 12px !important;
+    }
+
+    .table-admin-messages th {
+        background-color: #fafafa !important;
+        color: #212529 !important;
+        font-size: 0.75rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        font-weight: 700 !important;
+        padding: 1rem 0.75rem !important;
+        border-bottom: 2px solid #e5e5e5 !important;
+    }
+
+    .table-admin-messages td {
+        padding: 1.1rem 0.75rem !important;
+        vertical-align: middle !important;
+        font-size: 0.9rem;
+    }
+
+    .row-unread {
+        color: #212529 !important;
+        font-weight: 600 !important;
+    }
+
+    .row-read {
+        color: #6c757d !important;
+    }
+
+    .badge-msg {
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        padding: 5px 10px !important;
+        border-radius: 6px !important;
+        display: inline-block;
+    }
+
+    .badge-msg-new {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        border: 1px solid #ffeeba !important;
+    }
+
+    .badge-msg-read {
+        background-color: #e2e3e5 !important;
+        color: #383d41 !important;
+        border: 1px solid #d6d8db !important;
+    }
+
+    .badge-msg-replied {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        border: 1px solid #c3e6cb !important;
+    }
+
+    .btn-reply-custom {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        padding: 0.4rem 1rem !important;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-reply-custom:hover {
+            background-color: #495057 !important;
+            color: #ffffff !important;
+        }
+
+    .btn-mark-read {
+        color: #6c757d !important;
+        border: 1px solid #dee2e6 !important;
+        background-color: #ffffff !important;
+        transition: all 0.2s ease;
+    }
+
+        .btn-mark-read:hover {
+            background-color: #212529 !important;
+            color: #ffffff !important;
+            border-color: #212529 !important;
+        }
+
+    .msg-truncate {
+        max-width: 280px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #495057;
+    }
+
+    .row-unread .msg-truncate {
+        color: #212529;
+    }
+
+    .filter-select {
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 2rem 0.45rem 1rem !important;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        .filter-select:focus {
+            border-color: #212529 !important;
+            box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.15) !important;
+            outline: 0;
+        }
+
+    .btn-filter-apply {
+        background-color: #212529 !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1.2rem !important;
+        font-weight: 500;
+    }
+
+        .btn-filter-apply:hover {
+            background-color: #495057 !important;
+        }
+
+    .btn-filter-reset {
+        background-color: #f8f9fa !important;
+        color: #495057 !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1.2rem !important;
+    }
+
+        .btn-filter-reset:hover {
+            background-color: #e2e6ea !important;
+            color: #212529 !important;
+        }
+
+    .admin-toast-success {
+        border: 1px solid #212529;
+        background-color: #fbfbfb;
+        color: #212529;
+    }
+</style>
+
+<div class="container mt-5" style="max-width: 1200px;">
+
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark" style="letter-spacing: -0.5px;">Запити від клієнтів</h2>
+        <p class="text-muted small mb-0">Центр зворотного зв'язку StepStyle: перегляд вхідних повідомлень та надсилання відповідей.</p>
+    </div>
+    <hr class="text-muted opacity-20 mb-4" />
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        <div class="alert admin-toast-success rounded-3 py-3 px-4 mb-4 d-flex align-items-center shadow-sm fw-medium">
+            <i class="bi bi-check2-circle fs-5 me-2"></i> @TempData["SuccessMessage"]
+        </div>
     }
 
-    <div class="table-responsive shadow-sm rounded-3">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Дата</th>
-                    <th>Клієнт</th>
-                    <th>Тема</th>
-                    <th>Повідомлення</th>
-                    <th>Статус</th>
-                    <th>Дії</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white">
-                @foreach (var item in Model)
-                {
-                    <tr class="@(item.IsRead ? "text-muted" : "fw-bold")">
-                        <td style="white-space: nowrap;">@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                        <td>
-                            <div>@item.Name</div>
-                            <small class="text-secondary">@item.Email</small>
-                        </td>
-                        <td>@(string.IsNullOrEmpty(item.Subject) ? "—" : item.Subject)</td>
-                        <td style="max-width: 250px;">
-                            <div style="max-height: 60px; overflow-y: auto;">
-                                @item.Message
-                            </div>
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(item.AdminReply))
-                            {
-                                <span class="badge bg-success">Надано відповідь</span>
-                            }
-                            else if (item.IsRead)
-                            {
-                                <span class="badge bg-secondary">Прочитано</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-warning text-dark">Нове</span>
-                            }
-                        </td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <a asp-action="Reply" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-reply"></i> Відповісти
-                                </a>
-                                
-                                @if (!item.IsRead)
-                                {
-                                    <form asp-action="MarkAsRead" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Просто позначити прочитаним">
-                                            <i class="bi bi-check2"></i>
-                                        </button>
-                                    </form>
-                                }
-                            </div>
-                        </td>
-                    </tr>
-                }
+    <div class="card p-3 mb-4 table-container shadow-sm border-0">
+        <form method="get" class="row g-3 align-items-end">
 
-                @if (!Model.Any())
-                {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label for="isReadFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-envelope-open me-1"></i> Показувати лише:
+                </label>
+                <select id="isReadFilter" name="isRead" class="form-select filter-select">
+                    <option value="">Всі повідомлення</option>
+                    @if (ViewBag.CurrentIsRead != null && ViewBag.CurrentIsRead == false)
+                    {
+                        <option value="false" selected="selected">Непрочитані</option>
+                        <option value="true">Прочитані</option>
+                    }
+                    else if (ViewBag.CurrentIsRead != null && ViewBag.CurrentIsRead == true)
+                    {
+                        <option value="false">Непрочитані</option>
+                        <option value="true" selected="selected">Прочитані</option>
+                    }
+                    else
+                    {
+                        <option value="false">Непрочитані</option>
+                        <option value="true">Прочитані</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <label for="hasReplyFilter" class="form-label small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-chat-left-dots me-1"></i> Надання відповіді
+                </label>
+                <select id="hasReplyFilter" name="hasReply" class="form-select filter-select">
+                    <option value="">Всі запити</option>
+                    @if (ViewBag.CurrentHasReply != null && ViewBag.CurrentHasReply == false)
+                    {
+                        <option value="false" selected="selected">Без відповіді</option>
+                        <option value="true">З відповіддю</option>
+                    }
+                    else if (ViewBag.CurrentHasReply != null && ViewBag.CurrentHasReply == true)
+                    {
+                        <option value="false">Без відповіді</option>
+                        <option value="true" selected="selected">З відповіддю</option>
+                    }
+                    else
+                    {
+                        <option value="false">Без відповіді</option>
+                        <option value="true">З відповіддю</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-md-auto d-flex gap-2 ms-md-auto">
+                <button type="submit" class="btn btn-filter-apply shadow-sm border-0 d-flex align-items-center">
+                    <i class="bi bi-funnel me-1"></i> Застосувати
+                </button>
+                <a asp-action="Index" class="btn btn-filter-reset d-flex align-items-center">
+                    Скинути
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card table-container shadow-sm overflow-hidden mb-5">
+        <div class="table-responsive">
+            <table class="table table-admin-messages table-hover align-middle mb-0">
+                <thead>
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">Поки що немає жодного повідомлення.</td>
+                        <th class="ps-4" style="width: 150px;">Дата</th>
+                        <th style="width: 220px;">Клієнт</th>
+                        <th style="width: 180px;">Тема</th>
+                        <th>Повідомлення</th>
+                        <th style="width: 160px;">Статус</th>
+                        <th class="pe-4 text-end" style="width: 160px;">Дії</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var rowClass = item.IsRead ? "row-read" : "row-unread";
+
+                        <tr class="@rowClass">
+                            <td class="ps-4 text-secondary" style="font-size: 0.85rem; white-space: nowrap;">
+                                @item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")
+                                <span class="text-muted small ms-1" style="font-size: 0.75rem;">@item.CreatedAt.ToLocalTime().ToString("HH:mm")</span>
+                            </td>
+                            <td>
+                                <div class="text-dark fw-semibold" style="font-size: 0.95rem;">@item.Name</div>
+                                <div class="text-muted small" style="font-size: 0.8rem; font-family: monospace;">@item.Email</div>
+                            </td>
+                            <td class="text-dark">
+                                @(string.IsNullOrEmpty(item.Subject) ? "—" : item.Subject)
+                            </td>
+                            <td>
+                                <div class="msg-truncate" title="@item.Message">
+                                    @item.Message
+                                </div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.AdminReply))
+                                {
+                                    <span class="badge badge-msg badge-msg-replied">Відповів</span>
+                                }
+                                else if (item.IsRead)
+                                {
+                                    <span class="badge badge-msg badge-msg-read">Прочитано</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-msg badge-msg-new">Нове</span>
+                                }
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="d-flex gap-2 justify-content-end align-items-center">
+                                    <a asp-action="Reply" asp-route-id="@item.Id" class="btn btn-reply-custom rounded-pill shadow-sm border-0 btn-sm">
+                                        <i class="bi bi-reply-fill me-1"></i> Відповісти
+                                    </a>
+
+                                    @if (!item.IsRead)
+                                    {
+                                        <form asp-action="MarkAsRead" method="post" class="d-inline m-0">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm btn-mark-read rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Позначити як прочитане">
+                                                <i class="bi bi-check2"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-chat-left-dots fs-2 d-block mb-2 text-muted opacity-50"></i>
+                                Не знайдено повідомлень за вказаними фільтрами або скринька порожня.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

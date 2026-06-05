@@ -4,19 +4,75 @@
     ViewData["Title"] = "Мої звернення";
 }
 
-<div class="container mt-5" style="max-width: 900px;">
+<style>
+    .page-title {
+        letter-spacing: -0.5px;
+    }
+
+    .msg-card {
+        background-color: #ffffff;
+        border: 1px solid #e5e5e5 !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .msg-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03) !important;
+        }
+
+    .status-badge-completed {
+        background-color: #212529;
+        color: #ffffff;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .status-badge-pending {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .quote-box-user {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #495057;
+    }
+
+    .quote-box-admin {
+        background-color: #ffffff;
+        border-left: 3px solid #212529 !important;
+        font-size: 0.95rem;
+    }
+
+    .empty-state-box {
+        border: 1px dashed #cccccc !important;
+        background-color: #fafafa;
+    }
+</style>
+
+<div class="container mt-5" style="max-width: 850px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Історія моїх запитів</h2>
-        <a asp-action="Index" class="btn btn-dark rounded-pill px-4">Нове запитання</a>
+        <h2 class="fw-bold mb-0 page-title text-dark">Історія моїх запитів</h2>
+        <a asp-action="Index" class="btn btn-dark rounded-pill px-4 fw-semibold shadow-sm btn-sm py-2" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+            <i class="bi bi-plus-lg me-1"></i> НОВЕ ЗАПИТАННЯ
+        </a>
     </div>
-    <hr />
+    <hr class="text-muted opacity-20 mb-5" />
 
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info text-center py-5 rounded-4 shadow-sm bg-white border">
-            <i class="bi bi-envelope-open text-muted fs-1 mb-3 d-block"></i>
-            <h5 class="fw-bold mb-2">Ви ще не надсилали запитів</h5>
-            <p class="text-muted mb-0">Усі ваші майбутні звернення та відповіді адміністрації відображатимуться на цій сторінці.</p>
+        <div class="text-center py-5 rounded-4 empty-state-box p-4">
+            <i class="bi bi-chat-square-dots text-muted mb-3 d-block" style="font-size: 2.5rem;"></i>
+            <h5 class="fw-bold text-dark mb-2">У вас немає активних звернень</h5>
+            <p class="text-muted small mx-auto mb-0" style="max-width: 450px;">
+                Тут відображатиметься історія ваших запитань щодо замовлень, міжнародної доставки чи наявності розмірів.
+            </p>
         </div>
     }
     else
@@ -25,50 +81,67 @@
             @foreach (var item in Model)
             {
                 <div class="col-12 mb-4">
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-start border-3 @(!string.IsNullOrEmpty(item.AdminReply) ? "border-success" : "border-warning")">
-                        <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center">
+                    <div class="card msg-card border-0 rounded-4 overflow-hidden">
+
+                        <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small">Створено:</span>
-                                <strong class="text-dark ms-1">@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</strong>
+                                <span class="text-muted small">Дата звернення:</span>
+                                <span class="text-dark fw-semibold ms-1" style="font-size: 0.9rem;">
+                                    @item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")
+                                </span>
+                                <span class="text-muted small ms-1" style="font-size: 0.8rem;">
+                                    о @item.CreatedAt.ToLocalTime().ToString("HH:mm")
+                                </span>
                             </div>
                             <div>
                                 @if (!string.IsNullOrEmpty(item.AdminReply))
                                 {
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-3 py-2 rounded-pill">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Отримано відповідь
+                                    <span class="badge status-badge-completed px-3 py-2 rounded-pill fw-medium">
+                                        <i class="bi bi-check2-circle me-1"></i> Оброблено
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 px-3 py-2 rounded-pill">
-                                        <i class="bi bi-hourglass-split me-1"></i> Очікує на розгляд
+                                    <span class="badge status-badge-pending px-3 py-2 rounded-pill fw-medium">
+                                        <i class="bi bi-clock me-1"></i> На розгляді
                                     </span>
                                 }
                             </div>
                         </div>
-                        <div class="card-body p-4 bg-white">
+
+                        <div class="card-body p-4">
                             <div class="mb-2">
-                                <span class="badge bg-secondary mb-2 px-2 py-1 rounded small text-uppercase" style="font-size: 10px;">Ваше запитання</span>
+                                <span class="text-uppercase fw-bold text-muted d-block mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">
+                                    Ваше запитання
+                                </span>
+
                                 @if (!string.IsNullOrEmpty(item.Subject))
                                 {
-                                    <h6 class="fw-bold text-dark mb-2">Тема: @item.Subject</h6>
+                                    <h6 class="fw-bold text-dark mb-2" style="font-size: 1.05rem;">@item.Subject</h6>
                                 }
-                                <p class="text-muted p-3 bg-light rounded-3 mb-0" style="white-space: pre-line;">@item.Message</p>
+                                <div class="p-3 quote-box-user mb-0" style="white-space: pre-line;">
+                                    @item.Message
+                                </div>
                             </div>
 
                             @if (!string.IsNullOrEmpty(item.AdminReply))
                             {
-                                <div class="mt-4 pt-3 border-top border-light">
+                                <div class="mt-4 pt-4 border-top border-light">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge bg-success px-2 py-1 rounded small text-uppercase" style="font-size: 10px;">Відповідь менеджера</span>
-                                        <small class="text-muted">@item.RepliedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                        <span class="text-uppercase fw-bold text-dark d-block" style="font-size: 0.65rem; letter-spacing: 1px;">
+                                            <i class="bi bi-arrow-return-right me-1 text-muted"></i> Відповідь менеджера StepStyle
+                                        </span>
+                                        <small class="text-muted" style="font-size: 0.8rem;">
+                                            @item.RepliedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                        </small>
                                     </div>
-                                    <p class="text-dark p-3 rounded-3 mb-0 fw-medium" style="background-color: #f4fbf7; border-left: 4px solid #198754; white-space: pre-line;">
+                                    <div class="p-3 quote-box-admin mb-0 fw-normal text-secondary shadow-sm rounded-2 border border-light" style="white-space: pre-line;">
                                         @item.AdminReply
-                                    </p>
+                                    </div>
                                 </div>
                             }
                         </div>
+
                     </div>
                 </div>
             }

@@ -2,13 +2,83 @@
     ViewData["Title"] = "Замовлення успішне";
 }
 
-<div class="container mt-5 text-center">
-    <div class="alert alert-success mt-4">
-        <h2>🎉 Дякуємо за замовлення!</h2>
-        <p class="lead">Ваше замовлення <strong>№@ViewBag.OrderId</strong> успішно оформлено і вже передано в обробку.</p>
-    </div>
-    
-    <div class="mt-4">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Повернутися на головну</a>
+<style>
+    .success-wrapper {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .success-icon-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background-color: #212529;
+        color: #ffffff;
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    }
+
+    .success-title {
+        letter-spacing: -1px;
+        font-weight: 800;
+        color: #212529;
+    }
+
+    .order-number-card {
+        background-color: #fafafa;
+        border: 1px dashed #cccccc !important;
+        border-radius: 16px;
+        padding: 1.25rem;
+    }
+
+    .btn-continue-shopping {
+        background-color: #212529;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 1rem 2.5rem;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+        .btn-continue-shopping:hover {
+            background-color: #495057;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+</style>
+
+<div class="container mt-5 py-5 text-center">
+    <div class="success-wrapper py-4">
+
+        <div class="success-icon-box animate__animated animate__zoomIn">
+            <i class="bi bi-bag-check"></i>
+        </div>
+
+        <h2 class="success-title mb-3 fs-1">Дякуємо за покупку!</h2>
+        <p class="text-muted px-2 mb-5" style="font-size: 1rem; line-height: 1.6;">
+            Ваше замовлення успішно зареєстроване. Наша команда вже розпочала комплектацію та підготовку товарів до відправки.
+        </p>
+
+        <div class="order-number-card mb-5 shadow-sm">
+            <span class="text-uppercase fw-bold text-muted d-block mb-1" style="font-size: 0.65rem; letter-spacing: 1px;">
+                Номер вашого замовлення
+            </span>
+            <strong class="text-dark fs-3" style="font-family: monospace; letter-spacing: 0.5px;">
+                #@ViewBag.OrderId
+            </strong>
+        </div>
+
+        <div>
+            <a asp-controller="Brand" asp-action="Index" class="btn btn-continue-shopping rounded-pill shadow-sm border-0">
+                Продовжити покупки
+            </a>
+        </div>
+
     </div>
 </div>

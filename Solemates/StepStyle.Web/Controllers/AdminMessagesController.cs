@@ -18,11 +18,32 @@ namespace StepStyle.Web.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool? isRead, bool? hasReply)
         {
-            var messages = await _context.ContactMessages
+            var messagesQuery = _context.ContactMessages.AsQueryable();
+
+            if (isRead.HasValue)
+            {
+                messagesQuery = messagesQuery.Where(m => m.IsRead == isRead.Value);
+            }
+
+            if (hasReply.HasValue)
+            {
+                if (hasReply.Value)
+                {
+                    messagesQuery = messagesQuery.Where(m => m.AdminReply != null && m.AdminReply != "");
+                }
+                else
+                {
+                    messagesQuery = messagesQuery.Where(m => m.AdminReply == null || m.AdminReply == "");
+                }
+            }
+
+            var messages = await messagesQuery
                 .OrderByDescending(m => m.CreatedAt)
                 .ToListAsync();
+            ViewBag.CurrentIsRead = isRead;
+            ViewBag.CurrentHasReply = hasReply;
 
             return View(messages);
         }
@@ -65,10 +86,9 @@ namespace StepStyle.Web.Controllers
 
             message.AdminReply = adminReply;
             message.RepliedAt = DateTime.UtcNow;
-            message.IsRead = true; 
+            message.IsRead = true;
 
             await _context.SaveChangesAsync();
-
 
             TempData["SuccessMessage"] = $"Відповідь успішно збережено для {message.Email}.";
             return RedirectToAction(nameof(Index));
