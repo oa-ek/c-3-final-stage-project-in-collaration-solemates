@@ -49,7 +49,16 @@ namespace StepStyle.Web.Controllers
             {
                 wishlist = new Wishlist { UserId = userId };
                 _context.Wishlists.Add(wishlist);
-                await _context.SaveChangesAsync();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+                {
+                    TempData["ErrorMessage"] = "Сесія застаріла. Будь ласка, вийдіть з акаунту та увійдіть знову.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             if (!wishlist.WishlistItems.Any(wi => wi.ProductId == productId))
@@ -60,9 +69,18 @@ namespace StepStyle.Web.Controllers
                     ProductId = productId,
                     AddedDate = DateTime.UtcNow
                 };
+
                 _context.WishlistItems.Add(item);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Товар додано до списку бажань!";
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Товар додано до списку бажань!";
+                }
+                catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("FOREIGN KEY") == true)
+                {
+                    TempData["ErrorMessage"] = "Не вдалося додати товар. Можливо, його вже видалено з бази.";
+                }
             }
 
             return RedirectToAction(nameof(Index));
